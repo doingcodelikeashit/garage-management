@@ -3,7 +3,8 @@ const jwt = require("jsonwebtoken");
 const Garage = require("../Model/garage.model");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
-const razorpay = require("../utils/razorpay");
+require("dotenv").config();
+// const razorpay = require("../utils/razorpay");
 
 const createGarage = async (req, res) => {
   try {
