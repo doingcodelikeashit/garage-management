@@ -3,7 +3,7 @@ const cors = require("cors");
 const app = express();
 const connection = require("./Config/db");
 const reminderRoutes = require("./Routes/reminder.routes");
-
+const superadminRoutes = require("./Routes/superadmin.routes");
 const garageRoutes = require("./Routes/garage.routes");
 const engineerRoutes = require("./Routes/engineer.routes");
 const jobRoutes = require("./Routes/jobCard.routes");
@@ -21,6 +21,7 @@ app.use("/api/admin", adminRoutes);
 // app.use("/api/history", historyRoutes);
 app.use("/api/billing", require("./Routes/billing.routes"));
 app.use("/api/reminders", reminderRoutes);
+app.use("/api/superadmin", superadminRoutes);
 app.use("/uploads", express.static("uploads")); // So you can access files (images) via URL
 
 const PORT = 8000;

@@ -1,4 +1,4 @@
-const Admin = require("../Model/admin.model");
+const Admin = require("../Model/user.model");
 const Garage = require("../Model/garage.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");

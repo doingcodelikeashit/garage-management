@@ -1,23 +1,61 @@
 const express = require("express");
 const router = express.Router();
 const adminController = require("../Controllers/admin.controller");
-const { verifyToken } = require("../Middlewares/adminAuth");
-// Admin routes
-router.get("/jobcardhistory", verifyToken, adminController.getAllJobCardHistory);
+const auth = require("../Middlewares/auth");
+const checkPermission = require("../Middlewares/checkpermission");
 router.post("/login", adminController.login);
 router.put("/update/password", adminController.updatePassword);
-router.get("/garages/pending", adminController.getPendingGarages);
-router.put("/garages/approve/:id", adminController.approveGarage);
+// Job Card History
+router.get(
+  "/jobcardhistory",
+  auth(),
+  checkPermission("jobcard:read"),
+  adminController.getAllJobCardHistory
+);
+
+// Garage Approval
+router.get(
+  "/garages/pending",
+  auth(),
+  checkPermission("garage:read"),
+  adminController.getPendingGarages
+);
+
+router.put(
+  "/garages/approve/:id",
+  auth(),
+  checkPermission("garage:approve"),
+  adminController.approveGarage
+);
 
 // Inventory
-router.post("/inventory/add", verifyToken, adminController.addPart);
-router.put("/inventory/update/:id", verifyToken, adminController.updatePart);
+router.post(
+  "/inventory/add",
+  auth(),
+  checkPermission("inventory:add"),
+  adminController.addPart
+);
+
+router.put(
+  "/inventory/update/:id",
+  auth(),
+  checkPermission("inventory:update"),
+  adminController.updatePart
+);
 
 // Insurance
-router.post("/insurance/add", verifyToken, adminController.addInsurance);
+router.post(
+  "/insurance/add",
+  auth(),
+  checkPermission("insurance:add"),
+  adminController.addInsurance
+);
+
 router.get(
   "/insurance/expiring",
-  verifyToken,
+  auth(),
+  checkPermission("insurance:view-expiring"),
   adminController.getExpiringInsurance
 );
+
 module.exports = router;
