@@ -8,7 +8,7 @@ const {
 } = require("../Controllers/inventory.controller");
 
 const authGarage = require("../Middlewares/garageauth.middleware");
-const checkPermission = require("../Middlewares/checkPermission");
+const checkPermission = require("../Middlewares/checkpermission");
 
 router.use(authGarage);
 

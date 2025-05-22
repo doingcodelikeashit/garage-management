@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const paymentController = require("../Controllers/payment.controller");
 const authGarage = require("../Middlewares/garageauth.middleware");
-const checkPermission = require("../Middlewares/checkPermission");
+const checkPermission = require("../Middlewares/checkpermission");
 
 // Secure all routes with garage auth
 router.use(authGarage);

@@ -8,7 +8,7 @@ const {
 } = require("../Controllers/garage.controller");
 
 const authGarage = require("../Middlewares/garageauth.middleware");
-const checkPermission = require("../Middlewares/checkPermission");
+const checkPermission = require("../Middlewares/checkpermission");
 
 const router = express.Router();
 
