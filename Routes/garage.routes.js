@@ -7,13 +7,26 @@ const {
   deleteGarage,
 } = require("../Controllers/garage.controller");
 
+const authGarage = require("../Middlewares/garageauth.middleware");
+const checkPermission = require("../Middlewares/checkPermission");
+
 const router = express.Router();
 
-// Create Garage (Super Admin Only)
-router.post("/create", createGarage);
 router.post("/login", garageLogin);
-router.get("/allgarages", getAllGarages);
+
+// Protected routes (Super Admin Only or Role-based)
+router.use(authGarage);
+
+router.post("/create", checkPermission("garage:create"), createGarage);
+router.get("/allgarages", checkPermission("garage:view"), getAllGarages);
+router.put("/allgarages/:id", checkPermission("garage:update"), updateGarage);
+router.delete(
+  "/allgarages/:id",
+  checkPermission("garage:delete"),
+  deleteGarage
+);
+
+// Nested payment routes (inherits authGarage)
 router.use("/payment", require("./payment.routes"));
-router.put("/allgarages/:id", updateGarage);
-router.delete("/allgarages/:id", deleteGarage);
+
 module.exports = router;

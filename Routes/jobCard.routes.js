@@ -6,39 +6,64 @@ const {
   updateJobCard,
   deleteJobCard,
   assignEngineer,
-  // updateJobStatus,
   logWorkProgress,
   qualityCheckByEngineer,
 } = require("../Controllers/jobCard.controller");
+
 const upload = require("../Middlewares/upload");
 const authGarage = require("../Middlewares/garageauth.middleware");
+const checkPermission = require("../Middlewares/checkPermission");
 
 const router = express.Router();
 
 router.use(authGarage);
-// Job Card Routes
 
-// Create Job Card
+// Get all Job Cards for a Garage
+router.get(
+  "/garage/:garageId",
+  checkPermission("jobcard:view"),
+  getJobCardsByGarage
+);
 
-// with images
-// ✅ Fixed Order
-router.get("/garage/:garageId", getJobCardsByGarage); // Get all Job Cards for a Garage
-
+// Create Job Card with images
 router.post(
   "/add",
+  checkPermission("jobcard:create"),
   upload.fields([
     { name: "images", maxCount: 5 },
     { name: "video", maxCount: 1 },
   ]),
   createJobCard
 );
-router.get("/:jobCardId", getJobCardById); // Get Single Job Card
-router.put("/:jobCardId", updateJobCard); // Update Job Card
-router.delete("/:jobCardId", deleteJobCard); // Delete Job Card
 
-// Engineer & Status Management
-router.put("/assign-engineer/:jobCardId", assignEngineer);
-router.put("/jobcard/:jobCardId/workprogress", logWorkProgress);
-router.put("/jobcard/:jobCardId/qualitycheck", qualityCheckByEngineer);
+// Get Single Job Card
+router.get("/:jobCardId", checkPermission("jobcard:view"), getJobCardById);
+
+// Update Job Card
+router.put("/:jobCardId", checkPermission("jobcard:update"), updateJobCard);
+
+// Delete Job Card
+router.delete("/:jobCardId", checkPermission("jobcard:delete"), deleteJobCard);
+
+// Assign Engineer
+router.put(
+  "/assign-engineer/:jobCardId",
+  checkPermission("jobcard:assign_engineer"),
+  assignEngineer
+);
+
+// Log Work Progress
+router.put(
+  "/jobcard/:jobCardId/workprogress",
+  checkPermission("jobcard:log_work"),
+  logWorkProgress
+);
+
+// Quality Check
+router.put(
+  "/jobcard/:jobCardId/qualitycheck",
+  checkPermission("jobcard:quality_check"),
+  qualityCheckByEngineer
+);
 
 module.exports = router;
