@@ -3,7 +3,7 @@ const router = express.Router();
 const { sendServiceReminder } = require("../Controllers/reminder.controller");
 
 const authGarage = require("../Middlewares/garageauth.middleware");
-const checkPermission = require("../Middlewares/checkPermission");
+const checkPermission = require("../Middlewares/checkpermission");
 
 router.use(authGarage);
 
