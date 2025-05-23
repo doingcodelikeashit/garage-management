@@ -20,12 +20,11 @@ const {
 
 // Public Route
 router.post("/login", garageLogin);
-
+router.post("/create", createGarage);
 // Protected Routes (Require Authentication)
 router.use(authGarage);
 
 // Garage Management Routes (Role-based Access Control)
-router.post("/create", checkPermission("garage:create"), createGarage);
 router.get("/allgarages", checkPermission("garage:view"), getAllGarages);
 router.put("/allgarages/:id", checkPermission("garage:update"), updateGarage);
 router.delete(
@@ -35,14 +34,10 @@ router.delete(
 );
 
 // User Management Routes (Role-based Access Control)
-router.post("/create-user", checkPermission("user:create"), createUser);
-router.put(
-  "/update-permissions/:id",
-  checkPermission("user:update"),
-  updatePermissions
-);
-router.delete("/delete-user/:id", checkPermission("user:delete"), deleteUser);
-router.get("/users", checkPermission("user:view"), getAllUsers);
+router.post("/create-user", createUser);
+router.put("/update-permissions/:id", updatePermissions);
+router.delete("/delete-user/:id", deleteUser);
+router.get("/users", getAllUsers);
 
 // Nested Routes (e.g., Payment)
 router.use("/payment", require("./payment.routes"));
