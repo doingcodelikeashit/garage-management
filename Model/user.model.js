@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema(
+const garageUserSchema = new mongoose.Schema(
   {
     name: String,
     email: { type: String, unique: true },
@@ -15,4 +15,4 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("GarageUser", garageUserSchema);

@@ -1,4 +1,4 @@
-const User = require("../Model/user.model"); // adjust path as needed
+const Admin = require("../Model/admin.model"); // adjust path as needed
 const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
 
@@ -22,7 +22,6 @@ const Connect = async () => {
         email: adminEmail,
         password: hashedPassword,
         role: "super-admin",
-        
       });
       await newAdmin.save();
       console.log("Admin created (admin@garage.com / admin1234)");

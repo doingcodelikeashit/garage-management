@@ -21,7 +21,7 @@ app.use("/api/admin", adminRoutes);
 // app.use("/api/history", historyRoutes);
 app.use("/api/billing", require("./Routes/billing.routes"));
 app.use("/api/reminders", reminderRoutes);
-app.use("/api/superadmin", superadminRoutes);
+// app.use("/api/superadmin", superadminRoutes);
 app.use("/uploads", express.static("uploads")); // So you can access files (images) via URL
 
 const PORT = 8000;
