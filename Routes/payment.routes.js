@@ -8,16 +8,11 @@ const checkPermission = require("../Middlewares/checkpermission");
 router.use(authGarage);
 
 // Create order for garage billing
-router.post(
-  "/create-order",
-  checkPermission("payment:create_order"),
-  paymentController.createOrder
-);
+router.post("/create-order", paymentController.createOrder);
 
 // Create Razorpay order for garage signup
 router.post(
   "/createorderforsignup",
-  checkPermission("payment:signup_order"),
   paymentController.createRazorpayOrderForSingUp
 );
 

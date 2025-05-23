@@ -21,6 +21,7 @@ const {
 // Public Route
 router.post("/login", garageLogin);
 router.post("/create", createGarage);
+router.use("/payment", require("./payment.routes"));
 // Protected Routes (Require Authentication)
 router.use(authGarage);
 
@@ -40,6 +41,5 @@ router.delete("/delete-user/:id", deleteUser);
 router.get("/users", getAllUsers);
 
 // Nested Routes (e.g., Payment)
-router.use("/payment", require("./payment.routes"));
 
 module.exports = router;

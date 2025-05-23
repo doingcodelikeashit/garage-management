@@ -20,6 +20,15 @@ const createGarage = async (req, res) => {
       razorpaySignature,
     } = req.body;
 
+    if (process.env.NODE_ENV !== "development") {
+      const body = `${razorpayOrderId}|${razorpayPaymentId}`;
+      const expectedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+        .update(body.toString())
+        .digest("hex");
+
+      isSignatureValid = expectedSignature === razorpaySignature;
+    }
     // Validate subscription type
     const validSubscriptions = ["3_months", "6_months", "1_year"];
     if (!validSubscriptions.includes(subscriptionType)) {
