@@ -14,7 +14,7 @@ const Connect = async () => {
     const adminEmail = process.env.ADMIN_EMAIL;
     const adminPassword = process.env.ADMIN_PASSWORD;
 
-    const existingAdmin = await User.findOne({ email: adminEmail });
+    const existingAdmin = await Admin.findOne({ email: adminEmail });
 
     if (!existingAdmin) {
       const hashedPassword = await bcrypt.hash(adminPassword, 10);

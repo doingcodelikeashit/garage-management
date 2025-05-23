@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../Model/garageUser.model");
+const User = require("../Model/user.model");
 
 const checkPermission = (requiredPermissions = []) => {
   return async (req, res, next) => {

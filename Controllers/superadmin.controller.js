@@ -1,4 +1,4 @@
-const User = require("../Model/garageUser.model");
+const User = require("../Model/user.model");
 const bcrypt = require("bcrypt");
 
 // CREATE user with permissions
