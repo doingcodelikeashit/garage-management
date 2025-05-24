@@ -5,7 +5,7 @@ const authGarage = require("../Middlewares/garageauth.middleware");
 const checkPermission = require("../Middlewares/checkpermission");
 
 // Secure all routes with garage auth
-router.use(authGarage);
+// router.use(authGarage);
 
 // Create order for garage billing
 router.post("/create-order", paymentController.createOrder);
