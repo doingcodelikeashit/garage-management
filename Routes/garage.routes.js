@@ -13,6 +13,7 @@ const checkPermission = require("../Middlewares/checkpermission");
 const router = express.Router();
 const {
   createUser,
+  userLogin,
   updatePermissions,
   deleteUser,
   getAllUsers,
@@ -22,6 +23,7 @@ const {
 router.post("/login", garageLogin);
 router.post("/create", createGarage);
 router.use("/payment", require("./payment.routes"));
+router.post("/user/login", userLogin);
 // Protected Routes (Require Authentication)
 router.use(authGarage);
 

@@ -12,7 +12,7 @@ const checkPermission = (requiredPermissions = []) => {
       if (!user) return res.status(401).json({ message: "User not found" });
 
       // Always allow super-admin
-      if (user.role === "super-admin") {
+      if (user.role === "super-admin" || user.role === "admin") {
         req.user = user;
         return next();
       }
