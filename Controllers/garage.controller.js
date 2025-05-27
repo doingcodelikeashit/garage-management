@@ -136,7 +136,14 @@ const getAllGarages = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
-
+const getMe = async (req, res, next) => {
+  try {
+    const garage = await Garage.findById(req.garage.id);
+    return res.status(200).json(garage);
+  } catch (err) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
 const updateGarage = async (req, res) => {
   try {
     const { id } = req.params;
@@ -182,4 +189,5 @@ module.exports = {
   getAllGarages,
   updateGarage,
   deleteGarage,
+  getMe,
 };

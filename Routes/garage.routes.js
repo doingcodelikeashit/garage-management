@@ -5,6 +5,7 @@ const {
   getAllGarages,
   updateGarage,
   deleteGarage,
+  getMe,
 } = require("../Controllers/garage.controller");
 
 const authGarage = require("../Middlewares/garageauth.middleware");
@@ -26,7 +27,7 @@ router.use("/payment", require("./payment.routes"));
 router.post("/user/login", userLogin);
 // Protected Routes (Require Authentication)
 router.use(authGarage);
-
+router.get("/getme", getMe);
 // Garage Management Routes (Role-based Access Control)
 router.get("/allgarages", checkPermission("garage:view"), getAllGarages);
 router.put("/allgarages/:id", checkPermission("garage:update"), updateGarage);
@@ -43,5 +44,4 @@ router.delete("/delete-user/:id", deleteUser);
 router.get("/users", getAllUsers);
 
 // Nested Routes (e.g., Payment)
-
 module.exports = router;
