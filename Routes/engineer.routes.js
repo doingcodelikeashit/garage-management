@@ -12,7 +12,7 @@ const checkPermission = require("../Middlewares/checkpermission"); // Optional i
 const router = express.Router();
 
 // Use garage authentication middleware
-router.use(authGarage);
+// router.use(authGarage);
 
 // Engineer CRUD Routes
 router.post(

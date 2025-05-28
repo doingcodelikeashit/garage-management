@@ -5,7 +5,7 @@ const { sendServiceReminder } = require("../Controllers/reminder.controller");
 const authGarage = require("../Middlewares/garageauth.middleware");
 const checkPermission = require("../Middlewares/checkpermission");
 
-router.use(authGarage);
+// router.use(authGarage);
 
 // Send service reminder (requires proper permission)
 router.post("/send", checkPermission("reminder:send"), sendServiceReminder);
