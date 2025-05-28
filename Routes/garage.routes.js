@@ -18,6 +18,7 @@ const {
   updatePermissions,
   deleteUser,
   getAllUsers,
+  getUserPermissions,
 } = require("../Controllers/superadmin.controller");
 const billingController = require("../controllers/billingController");
 
@@ -49,11 +50,13 @@ const {
   qualityCheckByEngineer,
 } = require("../controllers/jobCardController");
 const billingController = require("../Controllers/billing.controller");
+const auth = require("../Middlewares/auth");
 // Public Route
 router.post("/login", garageLogin);
 router.post("/create", createGarage);
 router.use("/payment", require("./payment.routes"));
 router.post("/user/login", userLogin);
+router.get("/user/getpermission", auth(), getUserPermissions);
 // Protected Routes (Require Authentication)
 router.get("/getme", getMe);
 // Garage Management Routes (Role-based Access Control)

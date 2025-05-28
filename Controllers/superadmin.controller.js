@@ -61,7 +61,24 @@ exports.userLogin = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+exports.getUserPermissions = async (req, res) => {
+  try {
+    const user = req.user;
 
+    if (!user || !user.permissions) {
+      return res.status(403).json({ message: "Permissions not available." });
+    }
+
+    return res.status(200).json({
+      userId: user._id,
+      role: user.role,
+      permissions: user.permissions,
+    });
+  } catch (error) {
+    console.error("Error fetching permissions:", error);
+    return res.status(500).json({ message: "Server error." });
+  }
+};
 // UPDATE user permissions
 exports.updatePermissions = async (req, res) => {
   try {
