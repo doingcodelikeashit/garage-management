@@ -16,7 +16,7 @@ const checkPermission = require("../Middlewares/checkpermission");
 
 const router = express.Router();
 
-router.use(authGarage);
+// router.use(authGarage);
 
 // Get all Job Cards for a Garage
 router.get(
