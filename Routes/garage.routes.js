@@ -19,7 +19,36 @@ const {
   deleteUser,
   getAllUsers,
 } = require("../Controllers/superadmin.controller");
+const billingController = require("../controllers/billingController");
 
+// Engineer Controllers
+const {
+  createEngineer,
+  getEngineersByGarage,
+  updateEngineer,
+  deleteEngineer,
+} = require("../controllers/engineerController");
+
+// Inventory Controllers
+const {
+  addPart,
+  getPartsByGarage,
+  updatePart,
+  deletePart,
+} = require("../controllers/inventoryController");
+const adminController = require("../controllers/adminController");
+// JobCard Controllers
+const {
+  getJobCardsByGarage,
+  createJobCard,
+  getJobCardById,
+  updateJobCard,
+  deleteJobCard,
+  assignEngineer,
+  logWorkProgress,
+  qualityCheckByEngineer,
+} = require("../controllers/jobCardController");
+const billingController = require("../Controllers/billing.controller");
 // Public Route
 router.post("/login", garageLogin);
 router.post("/create", createGarage);
@@ -35,6 +64,42 @@ router.delete(
   checkPermission("garage:delete"),
   deleteGarage
 );
+router.post("/billing/generate/:jobCardId", billingController.generateBill);
+router.post("/billing/pay", billingController.processPayment);
+router.get("/billing/invoice", billingController.getInvoice);
+
+router.post("/engineers/add", createEngineer);
+router.get("/engineers/:garageId", getEngineersByGarage);
+router.put("/engineers/:engineerId", updateEngineer);
+router.delete("/engineers/:engineerId", deleteEngineer);
+
+router.post("/inventory/add", addPart);
+router.get("/inventory/:garageId", getPartsByGarage);
+router.put("/inventory/update/:partId", updatePart);
+router.delete("/inventory/delete/:partId", deletePart);
+
+router.get("/jobcards/garage/:garageId", getJobCardsByGarage);
+router.post(
+  "/jobcards/add",
+  upload.fields([
+    { name: "images", maxCount: 5 },
+    { name: "video", maxCount: 1 },
+  ]),
+  createJobCard
+);
+router.get("/jobcards/:jobCardId", getJobCardById);
+router.put("/jobcards/:jobCardId", updateJobCard);
+router.delete("/jobcards/:jobCardId", deleteJobCard);
+router.put("/jobcards/assign-engineer/:jobCardId", assignEngineer);
+router.put("/jobcards/:jobCardId/workprogress", logWorkProgress);
+router.put("/jobcards/:jobCardId/qualitycheck", qualityCheckByEngineer);
+router.post("/inventory/add", adminController.addPart);
+
+router.put("/inventory/update/:id", adminController.updatePart);
+
+router.post("/insurance/add", adminController.addInsurance);
+
+router.get("/insurance/expiring", adminController.getExpiringInsurance);
 router.use(authGarage);
 // User Management Routes (Role-based Access Control)
 router.post("/create-user", createUser);

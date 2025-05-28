@@ -29,6 +29,11 @@ const InsuranceSchema = new mongoose.Schema(
         message: "Expiry date must be in the future",
       },
     },
+    garageId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Garage",
+      required: true,
+    },
   },
   { timestamps: true }
 );
