@@ -20,7 +20,7 @@ const {
   getAllUsers,
   getUserPermissions,
 } = require("../Controllers/superadmin.controller");
-const billingController = require("../controllers/billingController");
+const billingController = require("../Controllers/billing.controller");
 
 // Engineer Controllers
 const {
@@ -28,7 +28,7 @@ const {
   getEngineersByGarage,
   updateEngineer,
   deleteEngineer,
-} = require("../controllers/engineerController");
+} = require("../Controllers/engineer.controller");
 
 // Inventory Controllers
 const {
@@ -36,8 +36,9 @@ const {
   getPartsByGarage,
   updatePart,
   deletePart,
-} = require("../controllers/inventoryController");
-const adminController = require("../controllers/adminController");
+} = require("../controllers/inventory.controller");
+const adminController = require("../controllers/admin.controller");
+const upload = require("../Middlewares/upload");
 // JobCard Controllers
 const {
   getJobCardsByGarage,
@@ -48,8 +49,7 @@ const {
   assignEngineer,
   logWorkProgress,
   qualityCheckByEngineer,
-} = require("../controllers/jobCardController");
-const billingController = require("../Controllers/billing.controller");
+} = require("../controllers/jobCard.controller");
 const auth = require("../Middlewares/auth");
 // Public Route
 router.post("/login", garageLogin);
