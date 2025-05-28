@@ -8,7 +8,7 @@ const checkPermission = (requiredPermissions = []) => {
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findById(decoded.id);
+      const user = await User.findById(decoded.userId);
       if (!user) return res.status(401).json({ message: "User not found" });
 
       // Always allow super-admin
