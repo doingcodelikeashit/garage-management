@@ -26,7 +26,6 @@ router.post("/create", createGarage);
 router.use("/payment", require("./payment.routes"));
 router.post("/user/login", userLogin);
 // Protected Routes (Require Authentication)
-router.use(authGarage);
 router.get("/getme", getMe);
 // Garage Management Routes (Role-based Access Control)
 router.get("/allgarages", checkPermission("garage:view"), getAllGarages);
@@ -36,7 +35,7 @@ router.delete(
   checkPermission("garage:delete"),
   deleteGarage
 );
-
+router.use(authGarage);
 // User Management Routes (Role-based Access Control)
 router.post("/create-user", createUser);
 router.put("/update-permissions/:id", updatePermissions);
