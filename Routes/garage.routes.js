@@ -49,7 +49,7 @@ const {
   assignEngineer,
   logWorkProgress,
   qualityCheckByEngineer,
-} = require("../Controllers/jobcard.controller");
+} = require("../Controllers/jobCard.controller");
 const auth = require("../Middlewares/auth");
 // Public Route
 router.post("/login", garageLogin);
