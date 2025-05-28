@@ -36,8 +36,8 @@ const {
   getPartsByGarage,
   updatePart,
   deletePart,
-} = require("../controllers/inventory.controller");
-const adminController = require("../controllers/admin.controller");
+} = require("../Controllers/inventory.controller");
+const adminController = require("../Controllers/admin.controller");
 const upload = require("../Middlewares/upload");
 // JobCard Controllers
 const {
