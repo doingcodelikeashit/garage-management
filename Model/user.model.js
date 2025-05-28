@@ -11,6 +11,11 @@ const UserSchema = new mongoose.Schema(
       default: "staff",
     },
     permissions: [String],
+    garage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Garage",
+      required: true,
+    },
   },
   { timestamps: true }
 );

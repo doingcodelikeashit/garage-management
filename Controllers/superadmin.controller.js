@@ -22,6 +22,7 @@ exports.createUser = async (req, res) => {
       password: hashedPassword,
       role,
       permissions,
+      garageId: req.garage.id,
     });
 
     res.status(201).json({ message: "User created", user });
@@ -33,19 +34,31 @@ exports.userLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "user not found" });
+    const user = await User.findOne({ email }).populate("garage");
+    if (!user) {
+      return res.status(404).json({ message: "Invalid credentials" });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
+    if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
+    }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "30d",
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
+
+    res.json({
+      message: "log in successfully",
+      token,
+      user,
     });
-    res.json({ message: "Login successful", token ,user});
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
