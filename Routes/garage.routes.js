@@ -60,11 +60,11 @@ router.get("/user/getpermission", auth(), getUserPermissions);
 // Protected Routes (Require Authentication)
 router.get("/getme", getMe);
 // Garage Management Routes (Role-based Access Control)
-router.get("/allgarages", checkPermission("garage:view"), getAllGarages);
-router.put("/allgarages/:id", checkPermission("garage:update"), updateGarage);
+// router.get("/allgarages", checkPermission("garage:view"), getAllGarages);
+// router.put("/allgarages/:id", checkPermission("garage:update"), updateGarage);
 router.delete(
   "/allgarages/:id",
-  checkPermission("garage:delete"),
+  // checkPermission("garage:delete"),
   deleteGarage
 );
 router.post("/billing/generate/:jobCardId", billingController.generateBill);

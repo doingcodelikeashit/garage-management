@@ -6,7 +6,7 @@ const checkPermission = require("../Middlewares/checkpermission");
 router.post(
   "/generate/:jobCardId",
   auth(),
-  checkPermission("billing:generate"),
+  // checkPermission("billing:generate"),
   billingController.generateBill
 );
 
@@ -14,7 +14,7 @@ router.post(
 router.post(
   "/pay",
   auth(),
-  checkPermission("billing:pay"),
+  // checkPermission("billing:pay"),
   billingController.processPayment
 );
 
@@ -22,7 +22,7 @@ router.post(
 router.get(
   "/invoice",
   auth(),
-  checkPermission("billing:invoice"),
+  // checkPermission("billing:invoice"),
   billingController.getInvoice
 );
 module.exports = router;

@@ -21,14 +21,14 @@ const router = express.Router();
 // Get all Job Cards for a Garage
 router.get(
   "/garage/:garageId",
-  checkPermission("jobcard:view"),
+  // checkPermission("jobcard:view"),
   getJobCardsByGarage
 );
 
 // Create Job Card with images
 router.post(
   "/add",
-  checkPermission("jobcard:create"),
+  // checkPermission("jobcard:create"),
   upload.fields([
     { name: "images", maxCount: 5 },
     { name: "video", maxCount: 1 },
@@ -37,32 +37,32 @@ router.post(
 );
 
 // Get Single Job Card
-router.get("/:jobCardId", checkPermission("jobcard:view"), getJobCardById);
+router.get("/:jobCardId", getJobCardById);
 
 // Update Job Card
-router.put("/:jobCardId", checkPermission("jobcard:update"), updateJobCard);
+router.put("/:jobCardId", updateJobCard);
 
 // Delete Job Card
-router.delete("/:jobCardId", checkPermission("jobcard:delete"), deleteJobCard);
+router.delete("/:jobCardId", deleteJobCard);
 
 // Assign Engineer
 router.put(
   "/assign-engineer/:jobCardId",
-  checkPermission("jobcard:assign_engineer"),
+  // checkPermission("jobcard:assign_engineer"),
   assignEngineer
 );
 
 // Log Work Progress
 router.put(
   "/jobcard/:jobCardId/workprogress",
-  checkPermission("jobcard:log_work"),
+  // checkPermission("jobcard:log_work"),
   logWorkProgress
 );
 
 // Quality Check
 router.put(
   "/jobcard/:jobCardId/qualitycheck",
-  checkPermission("jobcard:quality_check"),
+  // checkPermission("jobcard:quality_check"),
   qualityCheckByEngineer
 );
 

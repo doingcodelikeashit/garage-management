@@ -9,7 +9,7 @@ router.put("/update/password", adminController.updatePassword);
 router.get(
   "/jobcardhistory",
   auth(),
-  checkPermission("jobcard:read"),
+  // checkPermission("jobcard:read"),
   adminController.getAllJobCardHistory
 );
 
@@ -17,14 +17,14 @@ router.get(
 router.get(
   "/garages/pending",
   auth(),
-  checkPermission("garage:read"),
+  // checkPermission("garage:read"),
   adminController.getPendingGarages
 );
 
 router.put(
   "/garages/approve/:id",
   auth(),
-  checkPermission("garage:approve"),
+  // checkPermission("garage:approve"),
   adminController.approveGarage
 );
 
@@ -32,14 +32,14 @@ router.put(
 router.post(
   "/inventory/add",
   auth(),
-  checkPermission("inventory:add"),
+  // checkPermission("inventory:add"),
   adminController.addPart
 );
 
 router.put(
   "/inventory/update/:id",
   auth(),
-  checkPermission("inventory:update"),
+  // checkPermission("inventory:update"),
   adminController.updatePart
 );
 
@@ -47,14 +47,14 @@ router.put(
 router.post(
   "/insurance/add",
   auth(),
-  checkPermission("insurance:add"),
+  // checkPermission("insurance:add"),
   adminController.addInsurance
 );
 
 router.get(
   "/insurance/expiring",
   auth(),
-  checkPermission("insurance:view-expiring"),
+  // checkPermission("insurance:view-expiring"),
   adminController.getExpiringInsurance
 );
 

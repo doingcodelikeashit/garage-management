@@ -8,6 +8,6 @@ const checkPermission = require("../Middlewares/checkpermission");
 // router.use(authGarage);
 
 // Send service reminder (requires proper permission)
-router.post("/send", checkPermission("reminder:send"), sendServiceReminder);
+router.post("/send", sendServiceReminder);
 
 module.exports = router;

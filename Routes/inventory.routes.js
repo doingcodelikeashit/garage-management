@@ -13,18 +13,21 @@ const checkPermission = require("../Middlewares/checkpermission");
 // router.use(authGarage);
 
 // Add a new part
-router.post("/add", checkPermission("inventory:add"), addPart);
+router.post("/add", addPart);
 
 // Get all parts for a garage
-router.get("/:garageId", checkPermission("inventory:view"), getPartsByGarage);
+router.get(
+  "/:garageId",
+  /*checkPermission("inventory:view"),*/ getPartsByGarage
+);
 
 // Update a part
-router.put("/update/:partId", checkPermission("inventory:update"), updatePart);
+router.put("/update/:partId", updatePart);
 
 // Delete a part (optional)
 router.delete(
   "/delete/:partId",
-  checkPermission("inventory:delete"),
+  // checkPermission("inventory:delete"),
   deletePart
 );
 

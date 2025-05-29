@@ -17,25 +17,25 @@ const router = express.Router();
 // Engineer CRUD Routes
 router.post(
   "/add",
-  checkPermission("engineer:add"), // Optional
+  // checkPermission("engineer:add"), // Optional
   createEngineer
 );
 
 router.get(
   "/:garageId",
-  checkPermission("engineer:view"), // Optional
+  // checkPermission("engineer:view"), // Optional
   getEngineersByGarage
 );
 
 router.put(
   "/:engineerId",
-  checkPermission("engineer:update"), // Optional
+  // checkPermission("engineer:update"), // Optional
   updateEngineer
 );
 
 router.delete(
   "/:engineerId",
-  checkPermission("engineer:delete"), // Optional
+  // checkPermission("engineer:delete"), // Optional
   deleteEngineer
 );
 
