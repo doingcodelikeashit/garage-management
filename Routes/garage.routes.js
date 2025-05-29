@@ -96,9 +96,6 @@ router.delete("/jobcards/:jobCardId", deleteJobCard);
 router.put("/jobcards/assign-engineer/:jobCardId", assignEngineer);
 router.put("/jobcards/:jobCardId/workprogress", logWorkProgress);
 router.put("/jobcards/:jobCardId/qualitycheck", qualityCheckByEngineer);
-router.post("/inventory/add", adminController.addPart);
-
-router.put("/inventory/update/:id", adminController.updatePart);
 
 router.post("/insurance/add", adminController.addInsurance);
 
