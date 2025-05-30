@@ -11,7 +11,7 @@ const GarageSchema = new mongoose.Schema(
     subscriptionType: {
       type: String,
       // enum: ["3_months", "6_months", "1_year"],
-      required: true,
+      // required: true,
     },
     subscriptionStart: {
       type: Date,
