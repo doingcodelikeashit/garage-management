@@ -14,10 +14,11 @@ const createGarage = async (req, res) => {
       phone,
       email,
       password,
-      subscriptionType,
+      durationInMonths, // e.g., 1, 3, 6, 12
       razorpayOrderId,
       razorpayPaymentId,
       razorpaySignature,
+      amount,
     } = req.body;
 
     if (process.env.NODE_ENV !== "development") {
@@ -30,10 +31,10 @@ const createGarage = async (req, res) => {
       isSignatureValid = expectedSignature === razorpaySignature;
     }
     // Validate subscription type
-    const validSubscriptions = ["3_months", "6_months", "1_year"];
-    if (!validSubscriptions.includes(subscriptionType)) {
-      return res.status(400).json({ message: "Invalid subscription type" });
-    }
+    // const validSubscriptions = ["3_months", "6_months", "1_year"];
+    // if (!validSubscriptions.includes(subscriptionType)) {
+    //   return res.status(400).json({ message: "Invalid subscription type" });
+    // }
 
     // Validate Razorpay payment signature
     const body = `${razorpayOrderId}|${razorpayPaymentId}`;
@@ -53,16 +54,19 @@ const createGarage = async (req, res) => {
     }
 
     // Calculate subscription end date
+    // const startDate = new Date();
+    // const endDate = new Date(startDate);
+    // const durationMap = {
+    //   "1_months": 1,
+    //   "3_months": 3,
+    //   "6_months": 6,
+    //   "1_year": 12,
+    // };
+    // endDate.setMonth(endDate.getMonth() + durationMap[subscriptionType]);
+
     const startDate = new Date();
     const endDate = new Date(startDate);
-    const durationMap = {
-      "1_months": 1,
-      "3_months": 3,
-      "6_months": 6,
-      "1_year": 12,
-    };
-    endDate.setMonth(endDate.getMonth() + durationMap[subscriptionType]);
-
+    endDate.setMonth(endDate.getMonth() + durationInMonths);
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newGarage = new Garage({
@@ -71,13 +75,13 @@ const createGarage = async (req, res) => {
       phone,
       email,
       password: hashedPassword,
-      subscriptionType,
+      subscriptionType: `${durationInMonths}_months`,
       subscriptionStart: startDate,
       subscriptionEnd: endDate,
       isSubscribed: true,
       paymentDetails: {
         paymentId: razorpayPaymentId,
-        amount: req.body.amount,
+        amount: amount,
         method: "razorpay",
         status: "paid",
       },
