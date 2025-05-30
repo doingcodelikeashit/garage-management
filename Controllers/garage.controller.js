@@ -31,7 +31,7 @@ const createGarage = async (req, res) => {
     }
 
     // Razorpay Signature Validation - Skip if Free Plan
-    if (!isFreePlan && process.env.NODE_ENV !== "development") {
+    if (!isFreePlan) {
       const body = `${razorpayOrderId}|${razorpayPaymentId}`;
       const expectedSignature = crypto
         .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
