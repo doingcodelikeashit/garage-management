@@ -19,32 +19,28 @@ const createGarage = async (req, res) => {
       razorpayPaymentId,
       razorpaySignature,
       amount,
+      isFreePlan = false, // Optional flag for free plan
     } = req.body;
 
-    if (process.env.NODE_ENV !== "development") {
+    if (
+      !durationInMonths ||
+      typeof durationInMonths !== "number" ||
+      durationInMonths <= 0
+    ) {
+      return res.status(400).json({ message: "Invalid subscription duration" });
+    }
+
+    // Razorpay Signature Validation - Skip if Free Plan
+    if (!isFreePlan && process.env.NODE_ENV !== "development") {
       const body = `${razorpayOrderId}|${razorpayPaymentId}`;
       const expectedSignature = crypto
         .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-        .update(body.toString())
+        .update(body)
         .digest("hex");
 
-      isSignatureValid = expectedSignature === razorpaySignature;
-    }
-    // Validate subscription type
-    // const validSubscriptions = ["3_months", "6_months", "1_year"];
-    // if (!validSubscriptions.includes(subscriptionType)) {
-    //   return res.status(400).json({ message: "Invalid subscription type" });
-    // }
-
-    // Validate Razorpay payment signature
-    const body = `${razorpayOrderId}|${razorpayPaymentId}`;
-    const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(body.toString())
-      .digest("hex");
-
-    if (expectedSignature !== razorpaySignature) {
-      return res.status(400).json({ message: "Invalid Razorpay signature" });
+      if (expectedSignature !== razorpaySignature) {
+        return res.status(400).json({ message: "Invalid Razorpay signature" });
+      }
     }
 
     // Check for existing garage
@@ -53,20 +49,11 @@ const createGarage = async (req, res) => {
       return res.status(400).json({ message: "Garage already exists" });
     }
 
-    // Calculate subscription end date
-    // const startDate = new Date();
-    // const endDate = new Date(startDate);
-    // const durationMap = {
-    //   "1_months": 1,
-    //   "3_months": 3,
-    //   "6_months": 6,
-    //   "1_year": 12,
-    // };
-    // endDate.setMonth(endDate.getMonth() + durationMap[subscriptionType]);
-
+    // Calculate subscription dates
     const startDate = new Date();
     const endDate = new Date(startDate);
     endDate.setMonth(endDate.getMonth() + durationInMonths);
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newGarage = new Garage({
@@ -79,12 +66,19 @@ const createGarage = async (req, res) => {
       subscriptionStart: startDate,
       subscriptionEnd: endDate,
       isSubscribed: true,
-      paymentDetails: {
-        paymentId: razorpayPaymentId,
-        amount: amount,
-        method: "razorpay",
-        status: "paid",
-      },
+      paymentDetails: isFreePlan
+        ? {
+            paymentId: null,
+            amount: 0,
+            method: "free",
+            status: "free",
+          }
+        : {
+            paymentId: razorpayPaymentId,
+            amount,
+            method: "razorpay",
+            status: "paid",
+          },
     });
 
     await newGarage.save();

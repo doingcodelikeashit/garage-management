@@ -10,7 +10,7 @@ const GarageSchema = new mongoose.Schema(
     approved: { type: Boolean, default: false }, // Super admin approves it
     subscriptionType: {
       type: String,
-      enum: ["3_months", "6_months", "1_year"],
+      // enum: ["3_months", "6_months", "1_year"],
       required: true,
     },
     subscriptionStart: {
