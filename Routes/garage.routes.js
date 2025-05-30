@@ -2,6 +2,7 @@ const express = require("express");
 const {
   createGarage,
   garageLogin,
+  getGarageById,
   getAllGarages,
   updateGarage,
   deleteGarage,
@@ -57,6 +58,7 @@ router.post("/create", createGarage);
 router.use("/payment", require("./payment.routes"));
 router.post("/user/login", userLogin);
 router.get("/user/getpermission", auth(), getUserPermissions);
+router.get("/getgaragebyid/:id", getGarageById);
 // Protected Routes (Require Authentication)
 // Garage Management Routes (Role-based Access Control)
 // router.get("/allgarages", checkPermission("garage:view"), getAllGarages);

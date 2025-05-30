@@ -149,6 +149,14 @@ const getMe = async (req, res, next) => {
     res.status(500).json({ message: "Server Error", error: err.message });
   }
 };
+const getGarageById = async (req, res) => {
+  try {
+    const garage = await Garage.findById(req.params.id);
+    return res.status(200).json(garage);
+  } catch (err) {
+    res.status(500).json({ message: "Server Error", error: err.message });
+  }
+};
 const updateGarage = async (req, res) => {
   try {
     const { id } = req.params;
@@ -191,6 +199,7 @@ const deleteGarage = async (req, res) => {
 module.exports = {
   createGarage,
   garageLogin,
+  getGarageById,
   getAllGarages,
   updateGarage,
   deleteGarage,
