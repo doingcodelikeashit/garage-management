@@ -56,6 +56,7 @@ const createGarage = async (req, res) => {
     const startDate = new Date();
     const endDate = new Date(startDate);
     const durationMap = {
+      "1_months": 1,
       "3_months": 3,
       "6_months": 6,
       "1_year": 12,
