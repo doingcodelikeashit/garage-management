@@ -24,9 +24,9 @@ exports.createRazorpayOrderForSingUp = async (req, res) => {
   try {
     const { amount, subscriptionType } = req.body;
 
-    if (!["3_months", "6_months", "1_year"].includes(subscriptionType)) {
-      return res.status(400).json({ message: "Invalid subscription type" });
-    }
+    // if (!["3_months", "6_months", "1_year"].includes(subscriptionType)) {
+    //   return res.status(400).json({ message: "Invalid subscription type" });
+    // }
 
     const order = await razorpay.orders.create({
       amount: amount * 100, // Razorpay works in paisa
