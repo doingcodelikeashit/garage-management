@@ -58,7 +58,6 @@ router.use("/payment", require("./payment.routes"));
 router.post("/user/login", userLogin);
 router.get("/user/getpermission", auth(), getUserPermissions);
 // Protected Routes (Require Authentication)
-router.get("/getme", getMe);
 // Garage Management Routes (Role-based Access Control)
 // router.get("/allgarages", checkPermission("garage:view"), getAllGarages);
 // router.put("/allgarages/:id", checkPermission("garage:update"), updateGarage);
@@ -102,6 +101,7 @@ router.post("/insurance/add", adminController.addInsurance);
 router.get("/insurance/expiring", adminController.getExpiringInsurance);
 router.use(authGarage);
 // User Management Routes (Role-based Access Control)
+router.get("/getme", getMe);
 router.post("/create-user", createUser);
 router.put("/update-permissions/:id", updatePermissions);
 router.delete("/delete-user/:id", deleteUser);
