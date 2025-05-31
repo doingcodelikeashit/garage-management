@@ -2,13 +2,14 @@ const express = require("express");
 const router = express.Router();
 const adminController = require("../Controllers/admin.controller");
 const auth = require("../Middlewares/auth");
-const checkPermission = require("../Middlewares/checkpermission");
+// const checkPermission = require("../Middlewares/checkpermission");
+const { verifyToken } = require("../Middlewares/adminAuth");
 router.post("/login", adminController.login);
 router.put("/update/password", adminController.updatePassword);
 // Job Card History
 router.get(
   "/jobcardhistory",
-  auth(),
+  verifyToken,
   // checkPermission("jobcard:read"),
   adminController.getAllJobCardHistory
 );
@@ -16,14 +17,15 @@ router.get(
 // Garage Approval
 router.get(
   "/garages/pending",
-  auth(),
+  // auth(),
+  verifyToken,
   // checkPermission("garage:read"),
   adminController.getPendingGarages
 );
 
 router.put(
   "/garages/approve/:id",
-  auth(),
+  verifyToken,
   // checkPermission("garage:approve"),
   adminController.approveGarage
 );
