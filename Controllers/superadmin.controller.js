@@ -118,7 +118,8 @@ exports.getAllUsers = async (req, res) => {
 
 exports.getUserById = async (req, res) => {
   try {
-    const users = await User.find({ garageId: req.garage.garageId });
+    // console.log(req.garage.id);
+    const users = await User.find({ garageId: req.garage.id });
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
