@@ -19,6 +19,7 @@ const {
   updatePermissions,
   deleteUser,
   getAllUsers,
+  getUserById,
   getUserPermissions,
 } = require("../Controllers/superadmin.controller");
 const billingController = require("../Controllers/billing.controller");
@@ -108,6 +109,6 @@ router.post("/create-user", createUser);
 router.put("/update-permissions/:id", updatePermissions);
 router.delete("/delete-user/:id", deleteUser);
 router.get("/users", getAllUsers);
-
+router.get("/getusersbygarage", getUserById);
 // Nested Routes (e.g., Payment)
 module.exports = router;

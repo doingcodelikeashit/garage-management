@@ -82,11 +82,14 @@ const createGarage = async (req, res) => {
     });
 
     await newGarage.save();
-
+    const token = jwt.sign({ garageId: garage._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
     res.status(201).json({
       message:
         "Garage created and subscription activated. Waiting for admin approval.",
       garage: newGarage,
+      token,
     });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
