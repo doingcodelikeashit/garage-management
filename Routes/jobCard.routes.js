@@ -8,6 +8,7 @@ const {
   assignEngineer,
   logWorkProgress,
   qualityCheckByEngineer,
+  updateJobStatus,
 } = require("../Controllers/jobCard.controller");
 
 const upload = require("../Middlewares/upload");
@@ -35,6 +36,8 @@ router.post(
   ]),
   createJobCard
 );
+
+router.put("/updatestatus/:jobCardId", updateJobStatus);
 
 // Get Single Job Card
 router.get("/:jobCardId", getJobCardById);

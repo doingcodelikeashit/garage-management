@@ -225,24 +225,26 @@ const assignEngineer = async (req, res) => {
 };
 
 // ➤ Update Job Status (In Progress, Completed, Pending, Cancelled)
-// const updateJobStatus = async (req, res) => {
-//   try {
-//     const { jobCardId } = req.params;
-//     const { status } = req.body;
+const updateJobStatus = async (req, res) => {
+  try {
+    const { jobCardId } = req.params;
+    const { status } = req.body;
 
-//     const jobCard = await JobCard.findById(jobCardId);
-//     if (!jobCard) {
-//       return res.status(404).json({ message: "Job Card not found" });
-//     }
+    const jobCard = await JobCard.findById(jobCardId);
+    if (!jobCard) {
+      return res.status(404).json({ message: "Job Card not found" });
+    }
 
-//     jobCard.status = status;
-//     await jobCard.save();
+    jobCard.status = status;
+    await jobCard.save();
 
-//     res.status(200).json({ message: "Job status updated successfully", jobCard });
-//   } catch (error) {
-//     res.status(500).json({ message: "Server Error", error: error.message });
-//   }
-// };
+    res
+      .status(200)
+      .json({ message: "Job status updated successfully", jobCard });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
 
 const logWorkProgress = async (req, res) => {
   try {
@@ -311,7 +313,7 @@ module.exports = {
   updateJobCard,
   deleteJobCard,
   assignEngineer,
-  // updateJobStatus,
+  updateJobStatus,
   logWorkProgress,
   qualityCheckByEngineer,
 };
