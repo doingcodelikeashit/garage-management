@@ -234,6 +234,38 @@ const assignEngineer = async (req, res) => {
   }
 };
 
+const assignJobCardsToEngineer = async (req, res) => {
+  try {
+    const { engineerId } = req.params;
+    const { jobCardIds } = req.body;
+
+    if (!Array.isArray(jobCardIds) || jobCardIds.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Provide an array of jobCardIds" });
+    }
+
+    const engineer = await Engineer.findById(engineerId);
+    if (!engineer) {
+      return res.status(404).json({ message: "Engineer not found" });
+    }
+
+    // Update JobCards to include this engineer
+    await JobCard.updateMany(
+      { _id: { $in: jobCardIds } },
+      { $addToSet: { engineerId: engineerId } } // Prevent duplicates
+    );
+
+    // Optional: Update Engineer to include jobCards (if using assignedJobCards field)
+    await Engineer.findByIdAndUpdate(engineerId, {
+      $addToSet: { assignedJobCards: { $each: jobCardIds } },
+    });
+
+    res.status(200).json({ message: "Job Cards assigned to engineer" });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
 // ➤ Update Job Status (In Progress, Completed, Pending, Cancelled)
 const updateJobStatus = async (req, res) => {
   try {
@@ -323,6 +355,7 @@ module.exports = {
   updateJobCard,
   deleteJobCard,
   assignEngineer,
+  assignJobCardsToEngineer,
   updateJobStatus,
   logWorkProgress,
   qualityCheckByEngineer,

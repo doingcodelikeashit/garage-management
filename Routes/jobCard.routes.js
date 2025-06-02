@@ -6,6 +6,7 @@ const {
   updateJobCard,
   deleteJobCard,
   assignEngineer,
+  assignJobCardsToEngineer,
   logWorkProgress,
   qualityCheckByEngineer,
   updateJobStatus,
@@ -53,6 +54,11 @@ router.put(
   "/assign-engineer/:jobCardId",
   // checkPermission("jobcard:assign_engineer"),
   assignEngineer
+);
+router.put(
+  "/assign-jobcards/:engineerId",
+  // checkPermission("jobcard:assign_engineer"),
+  assignJobCardsToEngineer
 );
 
 // Log Work Progress
