@@ -62,7 +62,6 @@ router.get("/user/getpermission", auth(), getUserPermissions);
 router.get("/getgaragebyid/:id", getGarageById);
 // Protected Routes (Require Authentication)
 // Garage Management Routes (Role-based Access Control)
-// router.get("/allgarages", checkPermission("garage:view"), getAllGarages);
 // router.put("/allgarages/:id", checkPermission("garage:update"), updateGarage);
 router.delete(
   "/allgarages/:id",

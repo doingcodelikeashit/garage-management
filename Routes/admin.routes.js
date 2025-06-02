@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const adminController = require("../Controllers/admin.controller");
+const garageController = require("../Controllers/garage.controller")
 const auth = require("../Middlewares/auth");
 // const checkPermission = require("../Middlewares/checkpermission");
 const { verifyToken } = require("../Middlewares/adminAuth");
@@ -13,7 +14,7 @@ router.get(
   // checkPermission("jobcard:read"),
   adminController.getAllJobCardHistory
 );
-
+router.get("/allgarages", garageController.getAllGarages);
 // Garage Approval
 router.get(
   "/garages/pending",
