@@ -196,29 +196,39 @@ const assignEngineer = async (req, res) => {
     const { jobCardId } = req.params;
     const { engineerId } = req.body;
 
+    // Validate input
+    if (!Array.isArray(engineerId) || engineerId.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Please provide an array of engineerIds" });
+    }
+
     // Find Job Card
     const jobCard = await JobCard.findById(jobCardId);
     if (!jobCard) {
       return res.status(404).json({ message: "Job Card not found" });
     }
 
-    // Check if Engineer Exists and belongs to the same garage
-    const engineer = await Engineer.findOne({
-      _id: engineerId,
+    // Validate Engineers and garage match
+    const engineers = await Engineer.find({
+      _id: { $in: engineerId },
       garageId: jobCard.garageId,
     });
-    if (!engineer) {
+
+    if (engineers.length !== engineerId.length) {
       return res
         .status(403)
-        .json({ message: "Engineer not found in this garage" });
+        .json({ message: "Some engineers are invalid or not in this garage" });
     }
 
+    // Assign Engineers
     jobCard.engineerId = engineerId;
     await jobCard.save();
 
-    res
-      .status(200)
-      .json({ message: "Engineer assigned successfully", jobCard });
+    res.status(200).json({
+      message: "Engineers assigned successfully",
+      jobCard,
+    });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
