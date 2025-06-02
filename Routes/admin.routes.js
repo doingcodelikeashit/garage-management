@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const adminController = require("../Controllers/admin.controller");
-const garageController = require("../Controllers/garage.controller")
+const garageController = require("../Controllers/garage.controller");
 const auth = require("../Middlewares/auth");
 // const checkPermission = require("../Middlewares/checkpermission");
 const { verifyToken } = require("../Middlewares/adminAuth");
@@ -14,7 +14,7 @@ router.get(
   // checkPermission("jobcard:read"),
   adminController.getAllJobCardHistory
 );
-router.get("/allgarages", garageController.getAllGarages);
+router.get("/allgarages", verifyToken, garageController.getAllGarages);
 // Garage Approval
 router.get(
   "/garages/pending",
@@ -30,33 +30,19 @@ router.put(
   // checkPermission("garage:approve"),
   adminController.approveGarage
 );
-
-// Inventory
-router.post(
-  "/inventory/add",
-  auth(),
-  // checkPermission("inventory:add"),
-  adminController.addPart
-);
-
-router.put(
-  "/inventory/update/:id",
-  auth(),
-  // checkPermission("inventory:update"),
-  adminController.updatePart
-);
-
 // Insurance
 router.post(
   "/insurance/add",
-  auth(),
+  verifyToken,
+  // auth(),
   // checkPermission("insurance:add"),
   adminController.addInsurance
 );
 
 router.get(
   "/insurance/expiring",
-  auth(),
+  verifyToken,
+  // auth(),
   // checkPermission("insurance:view-expiring"),
   adminController.getExpiringInsurance
 );
