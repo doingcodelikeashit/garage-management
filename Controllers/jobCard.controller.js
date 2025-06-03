@@ -253,7 +253,7 @@ const assignJobCardsToEngineer = async (req, res) => {
     // Update JobCards to include this engineer
     await JobCard.updateMany(
       { _id: { $in: jobCardIds } },
-      { $addToSet: { engineerId: engineerId } } // Prevent duplicates
+      { $set: { engineerId: engineerId } } // Prevent duplicates
     );
 
     // Optional: Update Engineer to include jobCards (if using assignedJobCards field)
