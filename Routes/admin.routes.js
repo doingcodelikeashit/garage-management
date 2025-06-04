@@ -5,6 +5,7 @@ const garageController = require("../Controllers/garage.controller");
 const auth = require("../Middlewares/auth");
 // const checkPermission = require("../Middlewares/checkpermission");
 const { verifyToken } = require("../Middlewares/adminAuth");
+router.use("/plan", verifyToken, require("./plan.routes"));
 router.post("/login", adminController.login);
 router.put("/update/password", adminController.updatePassword);
 // Job Card History
