@@ -5,7 +5,15 @@ const garageController = require("../Controllers/garage.controller");
 const auth = require("../Middlewares/auth");
 // const checkPermission = require("../Middlewares/checkpermission");
 const { verifyToken } = require("../Middlewares/adminAuth");
-router.use("/plan", verifyToken, require("./plan.routes"));
+// router.use("/plan", verifyToken, require("./plan.routes"));
+const planController = require('../Controllers/plan.controller');
+
+router.post('/plan', planController.createPlan);
+router.get('/plan', planController.getAllPlans);
+router.get('/plan/:id', planController.getPlanById);
+router.put('/plan/:id', planController.updatePlan);
+router.delete('/plan/:id', planController.deletePlan);
+
 router.post("/login", adminController.login);
 router.put("/update/password", adminController.updatePassword);
 // Job Card History
