@@ -6,13 +6,13 @@ const auth = require("../Middlewares/auth");
 // const checkPermission = require("../Middlewares/checkpermission");
 const { verifyToken } = require("../Middlewares/adminAuth");
 // router.use("/plan", verifyToken, require("./plan.routes"));
-const planController = require('../Controllers/plan.controller');
+const planController = require("../Controllers/plan.controller");
 
-router.post('/plan', planController.createPlan);
-router.get('/plan', planController.getAllPlans);
-router.get('/plan/:id', planController.getPlanById);
-router.put('/plan/:id', planController.updatePlan);
-router.delete('/plan/:id', planController.deletePlan);
+router.post("/plan", verifyToken, planController.createPlan);
+router.get("/plan", verifyToken, planController.getAllPlans);
+router.get("/plan/:id", verifyToken, planController.getPlanById);
+router.put("/plan/:id", verifyToken, planController.updatePlan);
+router.delete("/plan/:id", verifyToken, planController.deletePlan);
 
 router.post("/login", adminController.login);
 router.put("/update/password", adminController.updatePassword);
