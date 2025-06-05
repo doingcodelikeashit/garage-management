@@ -7,9 +7,8 @@ const auth = require("../Middlewares/auth");
 const { verifyToken } = require("../Middlewares/adminAuth");
 // router.use("/plan", verifyToken, require("./plan.routes"));
 const planController = require("../Controllers/plan.controller");
-
+router.get("/plan", planController.getAllPlans);
 router.post("/plan", verifyToken, planController.createPlan);
-router.get("/plan", verifyToken, planController.getAllPlans);
 router.get("/plan/:id", verifyToken, planController.getPlanById);
 router.put("/plan/:id", verifyToken, planController.updatePlan);
 router.delete("/plan/:id", verifyToken, planController.deletePlan);
