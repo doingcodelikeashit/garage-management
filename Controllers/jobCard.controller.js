@@ -69,16 +69,9 @@ const createJobCard = async (req, res) => {
     const images = req.files?.images?.map((file) => file.path) || [];
     const video = req.files?.video?.[0]?.path || null;
 
-    console.log("files :", req.files);
-
-    if (!req.files.images) {
-      return res.status(400).json({ message: "No images uploaded" });
-    }
-
-    // Validate garage exists
     const garage = await Garage.findById(garageId);
     if (!garage) {
-      return res.status(404).json({ message: "Garage not found , test" });
+      return res.status(404).json({ message: "Garage not found" });
     }
 
     const newJobCard = new JobCard({
@@ -99,16 +92,18 @@ const createJobCard = async (req, res) => {
       type,
       excessAmount,
       jobDetails,
-      images,
-      video,
+      images, // These are Cloudinary URLs
+      video, // Also Cloudinary URL
       status: "In Progress",
       engineerId: null,
     });
 
     await newJobCard.save();
-    res
-      .status(201)
-      .json({ message: "Job Card created successfully", jobCard: newJobCard });
+
+    res.status(201).json({
+      message: "Job Card created successfully",
+      jobCard: newJobCard,
+    });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
