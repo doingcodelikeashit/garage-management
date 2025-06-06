@@ -110,6 +110,18 @@ const garageLogin = async (req, res) => {
       return res.status(403).json({ message: "Garage not approved by admin" });
     }
 
+    if (garage.subscriptionEnd && new Date() > garage.subscriptionEnd) {
+      return res.status(403).json({
+        message: "Your subscription has expired. Please renew your plan.",
+        subscriptionExpired: true,
+      });
+    }
+    // Prevent login if already logged in
+    if (garage.activeToken) {
+      return res.status(403).json({
+        message: "Already logged in on another device. Please logout first.",
+      });
+    }
     const isMatch = await bcrypt.compare(password, garage.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid password" });
@@ -120,6 +132,9 @@ const garageLogin = async (req, res) => {
       expiresIn: "7d",
     });
 
+    garage.activeToken = token;
+    await garage.save();
+
     res.status(200).json({
       message: "Login successful",
       token,
@@ -127,6 +142,57 @@ const garageLogin = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+const garageLogout = async (req, res) => {
+  try {
+    const garage = await Garage.findById(req.params.garageId); // assuming auth middleware sets this
+    if (!garage) {
+      return res.status(404).json({ message: "Garage not found" });
+    }
+
+    garage.activeToken = null;
+    await garage.save();
+
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const renewGarageSubscription = async (req, res) => {
+  try {
+    const { garageId } = req.params;
+    const { durationInMonths, paymentId, amount, method, status } = req.body;
+
+    const garage = await Garage.findById(garageId);
+    if (!garage) {
+      return res.status(404).json({ message: "Garage not found" });
+    }
+
+    const currentDate = new Date();
+    const newEndDate = new Date(
+      currentDate.setMonth(currentDate.getMonth() + durationInMonths)
+    );
+
+    garage.subscriptionStart = new Date();
+    garage.subscriptionEnd = newEndDate;
+    garage.isSubscribed = true;
+    garage.paymentDetails = {
+      paymentId,
+      amount,
+      method,
+      status,
+    };
+
+    await garage.save();
+
+    res.status(200).json({
+      message: "Subscription renewed successfully",
+      garage,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
@@ -196,6 +262,8 @@ const deleteGarage = async (req, res) => {
 module.exports = {
   createGarage,
   garageLogin,
+  garageLogout,
+  renewGarageSubscription,
   getGarageById,
   getAllGarages,
   updateGarage,

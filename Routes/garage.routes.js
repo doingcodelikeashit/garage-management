@@ -2,6 +2,8 @@ const express = require("express");
 const {
   createGarage,
   garageLogin,
+  garageLogout,
+  renewGarageSubscription,
   getGarageById,
   getAllGarages,
   updateGarage,
@@ -55,7 +57,9 @@ const {
 const auth = require("../Middlewares/auth");
 // Public Route
 router.post("/login", garageLogin);
+router.post("/logout/:garageId", garageLogout);
 router.post("/create", createGarage);
+router.post("/renewplan/:garageId", renewGarageSubscription);
 router.use("/payment", require("./payment.routes"));
 router.post("/user/login", userLogin);
 router.get("/user/getpermission", auth(), getUserPermissions);
