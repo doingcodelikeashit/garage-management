@@ -24,6 +24,7 @@ const GarageSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    activeToken: { type: String, default: null },
     paymentDetails: {
       paymentId: String, // e.g. Razorpay/Stripe transaction ID
       amount: Number,
