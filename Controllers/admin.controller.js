@@ -82,6 +82,29 @@ exports.approveGarage = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+exports.rejectGarage = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const garage = await Garage.findById(id);
+    if (!garage) return res.status(404).json({ message: "Garage not found" });
+
+    garage.approved = false;
+    await garage.save();
+
+    // Send approval email
+    await sendEmail(
+      garage.email,
+      "Garage rejected",
+      `Hi ${garage.name}, your garage has been rejected. you may contact admin`
+    );
+
+    res.json({ message: "Garage rejected successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
 // Add Part
 exports.addPart = async (req, res) => {
   try {
