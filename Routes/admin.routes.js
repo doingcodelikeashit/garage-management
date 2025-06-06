@@ -38,6 +38,12 @@ router.put(
   // checkPermission("garage:approve"),
   adminController.approveGarage
 );
+router.put(
+  "/garages/reject/:id",
+  verifyToken,
+  // checkPermission("garage:approve"),
+  adminController.rejectGarage
+);
 // Insurance
 router.post(
   "/insurance/add",
