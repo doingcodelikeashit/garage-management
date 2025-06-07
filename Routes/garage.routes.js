@@ -58,7 +58,7 @@ const auth = require("../Middlewares/auth");
 // Public Route
 router.post("/login", garageLogin);
 router.post("/logout/:garageId", garageLogout);
-router.post("/create", createGarage);
+router.post("/create", upload.single("logo"), createGarage);
 router.post("/renewplan/:garageId", renewGarageSubscription);
 router.use("/payment", require("./payment.routes"));
 router.post("/user/login", userLogin);
