@@ -40,8 +40,8 @@ exports.updateTask = async (req, res) => {
 // Get All Tasks by Garage
 exports.getTasksByGarage = async (req, res) => {
   try {
-    const { garageId } = req.garage.id;
-
+    const garageId = req.garage.id;
+    // console.log(garageId);
     const tasks = await Task.find({ garageId });
 
     res.status(200).json({ message: "Tasks fetched", tasks });
