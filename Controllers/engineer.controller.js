@@ -13,15 +13,17 @@ const createEngineer = async (req, res) => {
     }
 
     // Check if engineer already exists with the same email
-    const existingEngineer = await Engineer.findOne({ email });
-    if (existingEngineer) {
-      return res.status(400).json({ message: "Engineer already exists" });
-    }
+    // const existingEngineer = await Engineer.findOne({ email });
+    // if (existingEngineer) {
+    //   return res.status(400).json({ message: "Engineer already exists" });
+    // }
 
     const newEngineer = new Engineer({ name, email, phone, garageId });
     await newEngineer.save();
 
-    res.status(201).json({ message: "Engineer added successfully", engineer: newEngineer });
+    res
+      .status(201)
+      .json({ message: "Engineer added successfully", engineer: newEngineer });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -51,12 +53,16 @@ const updateEngineer = async (req, res) => {
     const { engineerId } = req.params;
     const updates = req.body;
 
-    const engineer = await Engineer.findByIdAndUpdate(engineerId, updates, { new: true });
+    const engineer = await Engineer.findByIdAndUpdate(engineerId, updates, {
+      new: true,
+    });
     if (!engineer) {
       return res.status(404).json({ message: "Engineer not found" });
     }
 
-    res.status(200).json({ message: "Engineer updated successfully", engineer });
+    res
+      .status(200)
+      .json({ message: "Engineer updated successfully", engineer });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -78,4 +84,9 @@ const deleteEngineer = async (req, res) => {
   }
 };
 
-module.exports = {createEngineer, updateEngineer,getEngineersByGarage,deleteEngineer}
+module.exports = {
+  createEngineer,
+  updateEngineer,
+  getEngineersByGarage,
+  deleteEngineer,
+};
