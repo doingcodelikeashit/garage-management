@@ -10,7 +10,7 @@ const {
   deleteGarage,
   getMe,
 } = require("../Controllers/garage.controller");
-
+const taskController = require("../Controllers/task.controller");
 const authGarage = require("../Middlewares/garageauth.middleware");
 const checkPermission = require("../Middlewares/checkpermission");
 
@@ -106,6 +106,16 @@ router.post("/insurance/add", adminController.addInsurance);
 
 router.get("/insurance/expiring", adminController.getExpiringInsurance);
 router.use(authGarage);
+router.post("/task/create", taskController.createTask);
+
+// Update Task
+router.put("/task/:taskId", taskController.updateTask);
+
+// Get All Tasks by Garage
+router.get("/gettask", taskController.getTasksByGarage);
+
+// Delete Task
+router.delete("/task/:taskId", taskController.deleteTask);
 // User Management Routes (Role-based Access Control)
 router.get("/getme", getMe);
 router.post("/create-user", createUser);
