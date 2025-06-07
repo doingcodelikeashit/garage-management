@@ -5,6 +5,7 @@ const GarageSchema = new mongoose.Schema(
     name: { type: String, required: true, unique: true },
     address: { type: String, required: true },
     phone: { type: String, required: true },
+    logo: { type: String, default: null },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true }, // Admin Password
     approved: { type: Boolean, default: false }, // Super admin approves it

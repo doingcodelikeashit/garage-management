@@ -21,6 +21,7 @@ const createGarage = async (req, res) => {
       amount,
       isFreePlan = false, // Optional flag for free plan
     } = req.body;
+    const logoUrl = req.file?.path || null;
 
     if (
       !durationInMonths ||
@@ -61,6 +62,7 @@ const createGarage = async (req, res) => {
       address,
       phone,
       email,
+      logo: logoUrl,
       password: hashedPassword,
       subscriptionType: `${durationInMonths}_months`,
       subscriptionStart: startDate,
