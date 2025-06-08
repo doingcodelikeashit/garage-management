@@ -5,19 +5,12 @@ const bcrypt = require("bcrypt");
 const sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
-    const garage = await Garage.findOne({ email });
-
-    if (!garage) {
-      return res
-        .status(404)
-        .json({ message: "Garage with this email not found" });
-    }
 
     // Generate 6-digit numeric OTP
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
     // Save OTP (delete old if exists)
-    await OTP.deleteMany({ email });
+    await Otp.deleteMany({ email });
     const newOtp = new Otp({ email, otp: otpCode });
     await newOtp.save();
 
@@ -35,13 +28,35 @@ const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
     const otpRecord = await Otp.findOne({ email, otp });
+    const garage = await Garage.findOne({ email });
+
+    if (!garage) {
+      return res.status(404).json({ message: "Garage not found" });
+    }
 
     if (!otpRecord) {
       return res.status(400).json({ message: "Invalid OTP" });
     }
 
+    // Check if OTP already used
+    if (otpRecord.isVerified) {
+      return res.status(400).json({ message: "OTP already used" });
+    }
+
+    // Optional: Check for OTP expiry
+    if (otpRecord.expiresAt && otpRecord.expiresAt < new Date()) {
+      return res.status(400).json({ message: "OTP has expired" });
+    }
+
+    // Mark OTP and garage as verified
     otpRecord.isVerified = true;
     await otpRecord.save();
+
+    garage.isVerified = true;
+    await garage.save();
+
+    // Optional: Clean up OTP
+    await Otp.deleteMany({ email });
 
     res.status(200).json({ message: "OTP verified successfully" });
   } catch (error) {
