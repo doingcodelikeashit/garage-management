@@ -3,8 +3,6 @@ const jwt = require("jsonwebtoken");
 const Garage = require("../Model/garage.model");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
-const sendEmail = require("../Utils/mailer");
-const Otp = require("../Model/otp.model");
 require("dotenv").config();
 // const razorpay = require("../utils/razorpay");
 
@@ -86,15 +84,6 @@ const createGarage = async (req, res) => {
     });
 
     await newGarage.save();
-    // Generate and send OTP
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    await Otp.deleteMany({ email }); // Remove any old OTPs
-    await new Otp({ email, otp: otpCode }).save();
-    await sendEmail(
-      email,
-      "Verify Your Garage Account",
-      `Your OTP code is: ${otpCode}`
-    );
     const token = jwt.sign(
       { garageId: newGarage._id },
       process.env.JWT_SECRET,
@@ -104,7 +93,7 @@ const createGarage = async (req, res) => {
     );
     res.status(201).json({
       message:
-        "Garage created and subscription activated.OTP sent to email. Waiting for admin approval.",
+        "Garage created and subscription activated. Waiting for admin approval.",
       garage: newGarage,
       token,
     });
@@ -122,11 +111,8 @@ const garageLogin = async (req, res) => {
     if (!garage) {
       return res.status(404).json({ message: "Garage not found" });
     }
-
     if (!garage.isVerified) {
-      return res
-        .status(403)
-        .json({ message: "Please verify your email first via OTP" });
+      return res.status(403).json({ message: "Garage not verified" });
     }
     if (!garage.approved) {
       return res.status(403).json({ message: "Garage not approved by admin" });
