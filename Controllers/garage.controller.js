@@ -84,9 +84,13 @@ const createGarage = async (req, res) => {
     });
 
     await newGarage.save();
-    const token = jwt.sign({ garageId: garage._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign(
+      { garageId: newGarage._id },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
     res.status(201).json({
       message:
         "Garage created and subscription activated. Waiting for admin approval.",
@@ -107,7 +111,9 @@ const garageLogin = async (req, res) => {
     if (!garage) {
       return res.status(404).json({ message: "Garage not found" });
     }
-
+    if (!garage.isVerified) {
+      return res.status(403).json({ message: "Garage not verified" });
+    }
     if (!garage.approved) {
       return res.status(403).json({ message: "Garage not approved by admin" });
     }
