@@ -9,7 +9,7 @@ const engineerRoutes = require("./Routes/engineer.routes");
 const jobRoutes = require("./Routes/jobCard.routes");
 const inventoryRoutes = require("./Routes/inventory.routes");
 const adminRoutes = require("./Routes/admin.routes");
-
+const verificationRoutes = require("./Routes/verify.routes");
 app.use(cors());
 app.use(express.json());
 
@@ -18,6 +18,7 @@ app.use("/api/engineers", engineerRoutes);
 app.use("/api/jobcards", jobRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/verify", verificationRoutes);
 // app.use("/api/history", historyRoutes);
 app.use("/api/billing", require("./Routes/billing.routes"));
 app.use("/api/reminders", reminderRoutes);
