@@ -28,11 +28,11 @@ const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
     const otpRecord = await Otp.findOne({ email, otp });
-    const garage = await Garage.findOne({ email });
+    // const garage = await Garage.findOne({ email });
 
-    if (!garage) {
-      return res.status(404).json({ message: "Garage not found" });
-    }
+    // if (!garage) {
+    //   return res.status(404).json({ message: "Garage not found" });
+    // }
 
     if (!otpRecord) {
       return res.status(400).json({ message: "Invalid OTP" });
@@ -52,8 +52,8 @@ const verifyOtp = async (req, res) => {
     otpRecord.isVerified = true;
     await otpRecord.save();
 
-    garage.isVerified = true;
-    await garage.save();
+    // garage.isVerified = true;
+    // await garage.save();
 
     // Optional: Clean up OTP
     await Otp.deleteMany({ email });
