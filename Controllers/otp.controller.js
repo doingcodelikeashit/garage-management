@@ -56,7 +56,7 @@ const verifyOtp = async (req, res) => {
     // await garage.save();
 
     // Optional: Clean up OTP
-    await Otp.deleteMany({ email });
+    // await Otp.deleteMany({ email });
 
     res.status(200).json({ message: "OTP verified successfully" });
   } catch (error) {
@@ -84,7 +84,7 @@ const resetPassword = async (req, res) => {
     await garage.save();
 
     // Remove OTP record after successful reset
-    await Otp.deleteMany({ email });
+    // await Otp.deleteMany({ email });
 
     res.status(200).json({ message: "Password reset successful" });
   } catch (error) {
