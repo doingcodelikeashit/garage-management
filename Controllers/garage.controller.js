@@ -23,11 +23,8 @@ const createGarage = async (req, res) => {
     } = req.body;
     const logoUrl = req.file?.path || null;
 
-    if (
-      !durationInMonths ||
-      typeof durationInMonths !== "number" ||
-      durationInMonths <= 0
-    ) {
+    const duration = Number(durationInMonths);
+    if (!duration || isNaN(duration) || duration <= 0) {
       return res.status(400).json({ message: "Invalid subscription duration" });
     }
 
@@ -53,7 +50,7 @@ const createGarage = async (req, res) => {
     // Calculate subscription dates
     const startDate = new Date();
     const endDate = new Date(startDate);
-    endDate.setMonth(endDate.getMonth() + durationInMonths);
+    endDate.setMonth(endDate.getMonth() + duration);
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -64,7 +61,7 @@ const createGarage = async (req, res) => {
       email,
       logo: logoUrl,
       password: hashedPassword,
-      subscriptionType: `${durationInMonths}_months`,
+      subscriptionType: `${duration}_months`,
       subscriptionStart: startDate,
       subscriptionEnd: endDate,
       isSubscribed: true,
