@@ -14,6 +14,7 @@ const createGarage = async (req, res) => {
       phone,
       email,
       password,
+      gstNum,
       durationInMonths, // e.g., 1, 3, 6, 12
       razorpayOrderId,
       razorpayPaymentId,
@@ -61,6 +62,7 @@ const createGarage = async (req, res) => {
       email,
       logo: logoUrl,
       password: hashedPassword,
+      gstNum: gstNum,
       subscriptionType: `${duration}_months`,
       subscriptionStart: startDate,
       subscriptionEnd: endDate,
