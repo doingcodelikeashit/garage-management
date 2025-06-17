@@ -10,6 +10,7 @@ const GarageSchema = new mongoose.Schema(
     password: { type: String, required: true }, // Admin Password
     approved: { type: Boolean, default: false }, // Super admin approves it
     gstNum: { type: String, default: null },
+    panNum: { type: String, default: null },
     subscriptionType: {
       type: String,
       // enum: ["3_months", "6_months", "1_year"],
