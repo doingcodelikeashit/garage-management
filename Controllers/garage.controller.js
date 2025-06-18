@@ -204,7 +204,31 @@ const renewGarageSubscription = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+const updateGarageLogo = async (req, res) => {
+  try {
+    const garageId = req.params.id;
+    if (!req.file || !req.file.path) {
+      return res.status(400).json({ message: "No image file uploaded" });
+    }
 
+    const updatedGarage = await Garage.findByIdAndUpdate(
+      garageId,
+      { logo: req.file.path },
+      { new: true }
+    );
+
+    if (!updatedGarage) {
+      return res.status(404).json({ message: "Garage not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Logo updated successfully", garage: updatedGarage });
+  } catch (error) {
+    console.error("Error updating logo:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 const getAllGarages = async (req, res) => {
   try {
     const garages = await Garage.find();
@@ -270,6 +294,7 @@ const deleteGarage = async (req, res) => {
 
 module.exports = {
   createGarage,
+  updateGarageLogo,
   garageLogin,
   garageLogout,
   renewGarageSubscription,

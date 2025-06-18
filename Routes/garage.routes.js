@@ -9,6 +9,7 @@ const {
   updateGarage,
   deleteGarage,
   getMe,
+  updateGarageLogo,
 } = require("../Controllers/garage.controller");
 const taskController = require("../Controllers/task.controller");
 const authGarage = require("../Middlewares/garageauth.middleware");
@@ -59,6 +60,7 @@ const auth = require("../Middlewares/auth");
 router.post("/login", garageLogin);
 router.post("/logout/:garageId", garageLogout);
 router.post("/create", upload.single("logo"), createGarage);
+router.put("/updatelogo/:id", upload.single("logo"), updateGarageLogo);
 router.post("/renewplan/:garageId", renewGarageSubscription);
 router.use("/payment", require("./payment.routes"));
 router.post("/user/login", userLogin);
