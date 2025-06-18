@@ -108,7 +108,27 @@ const createJobCard = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+const updateGenerateBillStatus = async (req, res) => {
+  try {
+    const { jobCardId } = req.params;
 
+    const jobCard = await JobCard.findById(jobCardId);
+    if (!jobCard) {
+      return res.status(404).json({ message: "Job Card not found" });
+    }
+
+    jobCard.generateBill = true;
+    await jobCard.save();
+
+    res.status(200).json({
+      message: "Job Card bill status updated to true",
+      jobCard,
+    });
+  } catch (error) {
+    console.error("Error updating bill status:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 // ➤ Get All Job Cards (For a Specific Garage)
 const getJobCardsByGarage = async (req, res) => {
   try {
@@ -345,6 +365,7 @@ const qualityCheckByEngineer = async (req, res) => {
 };
 module.exports = {
   createJobCard,
+  updateGenerateBillStatus,
   getJobCardsByGarage,
   getJobCardById,
   updateJobCard,

@@ -10,6 +10,7 @@ const {
   logWorkProgress,
   qualityCheckByEngineer,
   updateJobStatus,
+  updateGenerateBillStatus,
 } = require("../Controllers/jobCard.controller");
 
 const upload = require("../Middlewares/upload");
@@ -37,7 +38,7 @@ router.post(
   ]),
   createJobCard
 );
-
+router.put("/updatebillstatus/:jobCardId", updateGenerateBillStatus);
 router.put("/updatestatus/:jobCardId", updateJobStatus);
 
 // Get Single Job Card

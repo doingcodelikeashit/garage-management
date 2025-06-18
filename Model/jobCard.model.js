@@ -29,8 +29,9 @@ const JobCardSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["In Progress", "Completed", "Pending", "Cancelled"],
-      default: "In Progress", // Default job status
+      // default: "In Progress", // Default job status
     },
+    generateBill: { type: Boolean, default: false },
     images: [{ type: String }],
     video: { type: String },
     partsUsed: [
