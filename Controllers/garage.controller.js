@@ -126,11 +126,11 @@ const garageLogin = async (req, res) => {
       });
     }
     // Prevent login if already logged in
-    if (garage.activeToken) {
-      return res.status(403).json({
-        message: "Already logged in on another device. Please logout first.",
-      });
-    }
+    // if (garage.activeToken) {
+    //   return res.status(403).json({
+    //     message: "Already logged in on another device. Please logout first.",
+    //   });
+    // }
     const isMatch = await bcrypt.compare(password, garage.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid password" });
