@@ -256,11 +256,11 @@ const getGarageById = async (req, res) => {
 const updateGarage = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, address, phone, email } = req.body;
+    const { name, address, phone, email, gstNum } = req.body;
 
     const updatedGarage = await Garage.findByIdAndUpdate(
       id,
-      { name, address, phone, email },
+      { name, address, phone, email, gstNum },
       { new: true }
     );
 
