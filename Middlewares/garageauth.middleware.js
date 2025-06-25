@@ -6,15 +6,23 @@ const authGarage = async (req, res, next) => {
     const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
-      return res.status(401).json({ message: "No token, and authorization denied" });
+      return res
+        .status(401)
+        .json({ message: "No token, and authorization denied" });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const garage = await Garage.findById(decoded.garageId);
 
-    if (!garage) {
-      return res.status(404).json({ message: "Garage not found" });
+    // if (!garage) {
+    //   return res.status(404).json({ message: "Garage not found" });
+    // }
+
+    if (!garage || garage.activeToken !== token) {
+      return res
+        .status(401)
+        .json({ message: "Session expired or invalid token" });
     }
 
     if (!garage.approved) {
@@ -23,9 +31,10 @@ const authGarage = async (req, res, next) => {
 
     req.garage = garage;
     next();
-
   } catch (error) {
-    res.status(401).json({ message: "Token is not valid", error: error.message });
+    res
+      .status(401)
+      .json({ message: "Token is not valid", error: error.message });
   }
 };
 
