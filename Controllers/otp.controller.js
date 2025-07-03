@@ -5,7 +5,13 @@ const bcrypt = require("bcrypt");
 const sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
+    const garage = await Garage.findOne({ email });
 
+    if (!garage) {
+      return res
+        .status(404)
+        .json({ message: "Garage not found at this email id" });
+    }
     // Generate 6-digit numeric OTP
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -28,11 +34,11 @@ const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
     const otpRecord = await Otp.findOne({ email, otp });
-    // const garage = await Garage.findOne({ email });
+    const garage = await Garage.findOne({ email });
 
-    // if (!garage) {
-    //   return res.status(404).json({ message: "Garage not found" });
-    // }
+    if (!garage) {
+      return res.status(404).json({ message: "Garage not found" });
+    }
 
     if (!otpRecord) {
       return res.status(400).json({ message: "Invalid OTP" });
