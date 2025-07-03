@@ -58,8 +58,8 @@ const verifyOtp = async (req, res) => {
     otpRecord.isVerified = true;
     await otpRecord.save();
 
-    // garage.isVerified = true;
-    // await garage.save();
+    garage.isVerified = true;
+    await garage.save();
 
     // Optional: Clean up OTP
     // await Otp.deleteMany({ email });
