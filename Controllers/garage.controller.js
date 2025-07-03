@@ -112,9 +112,9 @@ const garageLogin = async (req, res) => {
     if (!garage) {
       return res.status(404).json({ message: "Garage not found" });
     }
-    // if (!garage.isVerified) {
-    //   return res.status(403).json({ message: "Garage not verified" });
-    // }
+    if (!garage.isVerified) {
+      return res.status(403).json({ message: "Garage not verified" });
+    }
     if (!garage.approved) {
       return res.status(403).json({ message: "Garage not approved by admin" });
     }
