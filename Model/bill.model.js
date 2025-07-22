@@ -11,7 +11,7 @@ const BillSchema = new mongoose.Schema(
       ref: "Garage",
       required: true,
     },
-    invoiceNo: String,
+    invoiceNo: String, // Will be generated per garage, starting at 001
     parts: Array,
     services: Array,
     totalPartsCost: Number,
@@ -33,6 +33,20 @@ const BillSchema = new mongoose.Schema(
       default: "pending",
     },
     razorpayOrderId: String,
+    // New fields for requirements
+    billType: { type: String, enum: ["gst", "non-gst"], default: "gst" },
+    hsnCode: { type: String },
+    logo: { type: String },
+    billToParty: { type: String },
+    shiftToParty: { type: String },
+    bankDetails: {
+      accountHolderName: String,
+      accountNumber: String,
+      ifscCode: String,
+      bankName: String,
+      branchName: String,
+      upiId: String,
+    },
   },
   { timestamps: true }
 );

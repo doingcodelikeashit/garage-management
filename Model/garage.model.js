@@ -29,6 +29,15 @@ const GarageSchema = new mongoose.Schema(
     },
     isVerified: { type: Boolean, default: false },
     activeToken: { type: String, default: null },
+    // Bank details
+    bankDetails: {
+      accountHolderName: { type: String, default: null },
+      accountNumber: { type: String, default: null },
+      ifscCode: { type: String, default: null },
+      bankName: { type: String, default: null },
+      branchName: { type: String, default: null },
+      upiId: { type: String, default: null },
+    },
     paymentDetails: {
       paymentId: String, // e.g. Razorpay/Stripe transaction ID
       amount: Number,

@@ -57,13 +57,14 @@ const createJobCard = async (req, res) => {
       model,
       kilometer,
       fuelType,
+      fuelLevel, // Added fuel level
       insuranceProvider,
       policyNumber,
       expiryDate,
       registrationNumber,
-      type,
-      excessAmount,
-      jobDetails,
+      type, // jobType
+      jobDetails, // price removed from here
+      // excessAmount removed as required
     } = req.body;
 
     const images = req.files?.images?.map((file) => file.path) || [];
@@ -73,6 +74,10 @@ const createJobCard = async (req, res) => {
     if (!garage) {
       return res.status(404).json({ message: "Garage not found" });
     }
+
+    // Generate jobId (e.g., JC-<timestamp>)
+    const jobId = `JC-${Date.now()}`;
+    const createdBy = req.user ? req.user._id : null;
 
     const newJobCard = new JobCard({
       garageId,
@@ -85,17 +90,19 @@ const createJobCard = async (req, res) => {
       model,
       kilometer,
       fuelType,
+      fuelLevel, // Added
       insuranceProvider,
       policyNumber,
       expiryDate,
       registrationNumber,
-      type,
-      excessAmount,
-      jobDetails,
+      type, // jobType
+      jobDetails, // price removed
       images, // These are Cloudinary URLs
       video, // Also Cloudinary URL
       status: "In Progress",
       engineerId: null,
+      jobId, // Added jobId
+      createdBy, // Track creator
     });
 
     await newJobCard.save();
@@ -139,11 +146,16 @@ const getJobCardsByGarage = async (req, res) => {
     if (!garage) {
       return res.status(404).json({ message: "Garage not found , test two" });
     }
+    let filter = { garageId };
+    if (
+      req.user &&
+      req.user.role !== "admin" &&
+      req.user.role !== "super-admin"
+    ) {
+      filter.createdBy = req.user._id;
+    }
 
-    const jobCards = await JobCard.find({ garageId }).populate(
-      "engineerId",
-      "name"
-    );
+    const jobCards = await JobCard.find(filter).populate("engineerId", "name");
     res.status(200).json(jobCards);
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
@@ -154,7 +166,15 @@ const getJobCardsByGarage = async (req, res) => {
 const getJobCardById = async (req, res) => {
   try {
     const { jobCardId } = req.params;
-    const jobCard = await JobCard.findById(jobCardId).populate(
+    let filter = { _id: jobCardId };
+    if (
+      req.user &&
+      req.user.role !== "admin" &&
+      req.user.role !== "super-admin"
+    ) {
+      filter.createdBy = req.user._id;
+    }
+    const jobCard = await JobCard.findOne(filter).populate(
       "engineerId",
       "name"
     );
@@ -175,9 +195,41 @@ const updateJobCard = async (req, res) => {
     const { jobCardId } = req.params;
     const updates = req.body; // Fields to update
 
-    const jobCard = await JobCard.findByIdAndUpdate(jobCardId, updates, {
-      new: true,
-    });
+    // Only allow updating allowed fields
+    const allowedFields = [
+      "customerNumber",
+      "customerName",
+      "contactNumber",
+      "email",
+      "company",
+      "carNumber",
+      "model",
+      "kilometer",
+      "fuelType",
+      "fuelLevel",
+      "insuranceProvider",
+      "policyNumber",
+      "expiryDate",
+      "registrationNumber",
+      "type",
+      "jobDetails",
+      "images",
+      "video",
+      "status",
+      "engineerId",
+    ];
+    const filteredUpdates = {};
+    for (const key of allowedFields) {
+      if (updates[key] !== undefined) filteredUpdates[key] = updates[key];
+    }
+
+    const jobCard = await JobCard.findByIdAndUpdate(
+      jobCardId,
+      filteredUpdates,
+      {
+        new: true,
+      }
+    );
 
     if (!jobCard) {
       return res.status(404).json({ message: "Job Card not found" });

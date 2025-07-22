@@ -15,14 +15,8 @@ const authGarage = async (req, res, next) => {
 
     const garage = await Garage.findById(decoded.garageId);
 
-    // if (!garage) {
-    //   return res.status(404).json({ message: "Garage not found" });
-    // }
-
-    if (!garage || garage.activeToken !== token) {
-      return res
-        .status(401)
-        .json({ message: "Session expired or invalid token" });
+    if (!garage) {
+      return res.status(404).json({ message: "Garage not found" });
     }
 
     if (!garage.approved) {

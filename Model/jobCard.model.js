@@ -19,18 +19,21 @@ const JobCardSchema = new mongoose.Schema(
     model: { type: String, required: true },
     kilometer: { type: Number, required: true },
     fuelType: { type: String, required: true },
+    fuelLevel: { type: String }, // Added fuel level
     insuranceProvider: { type: String },
     policyNumber: { type: String },
     expiryDate: { type: Date },
     registrationNumber: { type: String },
-    type: { type: String },
-    excessAmount: { type: Number },
-    jobDetails: { type: String },
+    type: { type: String }, // jobType
+    // excessAmount removed as required
+    jobDetails: { type: String }, // price removed from here
     status: {
       type: String,
       enum: ["In Progress", "Completed", "Pending", "Cancelled"],
       // default: "In Progress", // Default job status
     },
+    // Add jobId for PDF and details
+    jobId: { type: String },
     generateBill: { type: Boolean, default: false },
     images: [{ type: String }],
     video: { type: String },

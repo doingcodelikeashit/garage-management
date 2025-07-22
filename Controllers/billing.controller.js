@@ -4,7 +4,15 @@ const JobCard = require("../Model/jobCard.model");
 exports.generateBill = async (req, res) => {
   try {
     const { jobCardId } = req.params;
-    const { parts, services, discount = 0, gstPercentage = 18 } = req.body;
+    const {
+      parts,
+      services,
+      discount = 0,
+      gstPercentage = 18,
+      billType = "gst",
+      billToParty,
+      shiftToParty,
+    } = req.body;
 
     const jobCard = await JobCard.findById(jobCardId);
     if (!jobCard)
@@ -17,18 +25,44 @@ exports.generateBill = async (req, res) => {
       });
     }
 
-    // Calculate totals
-    const totalPartsCost = parts.reduce(
-      (sum, p) => sum + p.quantity * p.pricePerUnit,
-      0
+    // Get garage for logo and bank details
+    const garage = await require("../Model/garage.model").findById(
+      jobCard.garageId
     );
-    const totalLaborCost = services.reduce((sum, s) => sum + s.laborCost, 0);
+    if (!garage) return res.status(404).json({ message: "Garage not found" });
+
+    // Get last invoice number for this garage
+    const lastBill = await Bill.findOne({ garageId: jobCard.garageId }).sort({
+      createdAt: -1,
+    });
+    let invoiceNo = "001";
+    if (lastBill && lastBill.invoiceNo) {
+      const lastNum = parseInt(lastBill.invoiceNo, 10);
+      invoiceNo = (lastNum + 1).toString().padStart(3, "0");
+    }
+
+    // Calculate totals
+    let totalPartsCost = 0;
+    let hsnCode = "";
+    if (parts && parts.length > 0) {
+      totalPartsCost = parts.reduce(
+        (sum, p) => sum + p.quantity * p.sellingPrice,
+        0
+      );
+      // Use HSN from first part (assume all same for now)
+      hsnCode = parts[0].hsnNumber || "";
+    }
+    const totalLaborCost = services
+      ? services.reduce((sum, s) => sum + s.laborCost, 0)
+      : 0;
     const subTotal = totalPartsCost + totalLaborCost;
 
-    const gst = parseFloat(((subTotal * gstPercentage) / 100).toFixed(2));
+    // GST logic
+    let gst = 0;
+    if (billType === "gst") {
+      gst = parseFloat(((subTotal * gstPercentage) / 100).toFixed(2));
+    }
     const finalAmount = subTotal + gst - discount;
-
-    const invoiceNo = `INV-${Date.now()}`;
 
     const newBill = new Bill({
       jobCardId,
@@ -40,9 +74,15 @@ exports.generateBill = async (req, res) => {
       totalLaborCost,
       subTotal,
       gst,
-      gstPercentage, // ✅ Save this
+      gstPercentage: billType === "gst" ? gstPercentage : 0,
       discount,
       finalAmount,
+      billType,
+      hsnCode,
+      logo: garage.logo,
+      billToParty,
+      shiftToParty,
+      bankDetails: garage.bankDetails,
     });
 
     await newBill.save();
@@ -75,7 +115,21 @@ exports.processPayment = async (req, res) => {
 exports.getInvoice = async (req, res) => {
   try {
     const { job_id } = req.query;
-    const bill = await Billing.findOne({ jobId: job_id });
+    let filter = { jobId: job_id };
+    if (
+      req.user &&
+      req.user.role !== "admin" &&
+      req.user.role !== "super-admin"
+    ) {
+      // Find jobcard and check createdBy
+      const jobCard = await require("../Model/jobCard.model").findOne({
+        jobId: job_id,
+      });
+      if (!jobCard || String(jobCard.createdBy) !== String(req.user._id)) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+    }
+    const bill = await Billing.findOne(filter);
     if (!bill) return res.status(404).json({ message: "Invoice not found" });
     res.json(bill);
   } catch (err) {

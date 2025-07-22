@@ -22,6 +22,7 @@ const createGarage = async (req, res) => {
       razorpaySignature,
       amount,
       isFreePlan = false, // Optional flag for free plan
+      bankDetails = {}, // Accept bank details
     } = req.body;
     const logoUrl = req.file?.path || null;
 
@@ -69,6 +70,7 @@ const createGarage = async (req, res) => {
       subscriptionStart: startDate,
       subscriptionEnd: endDate,
       isSubscribed: true,
+      bankDetails, // Save bank details
       paymentDetails: isFreePlan
         ? {
             paymentId: null,
@@ -256,11 +258,11 @@ const getGarageById = async (req, res) => {
 const updateGarage = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, address, phone, email, gstNum } = req.body;
+    const { name, address, phone, email, gstNum, bankDetails } = req.body;
 
     const updatedGarage = await Garage.findByIdAndUpdate(
       id,
-      { name, address, phone, email, gstNum },
+      { name, address, phone, email, gstNum, bankDetails },
       { new: true }
     );
 
