@@ -3,6 +3,7 @@ const cors = require("cors");
 const app = express();
 const connection = require("./Config/db");
 const reminderRoutes = require("./Routes/reminder.routes");
+const cleanupExpiredRegistrations = require("./Utils/cleanupExpiredRegistrations");
 // const superadminRoutes = require("./Routes/superadmin.routes");
 const garageRoutes = require("./Routes/garage.routes");
 const engineerRoutes = require("./Routes/engineer.routes");
@@ -34,6 +35,10 @@ app.get("/", (req, res) => {
 const startServer = async () => {
   try {
     await connection(); // Ensure DB is connected first
+
+    // Set up cleanup job to run every hour
+    setInterval(cleanupExpiredRegistrations, 60 * 60 * 1000); // Run every hour
+
     app.listen(PORT, () => {
       console.log("Welcome to server");
     });

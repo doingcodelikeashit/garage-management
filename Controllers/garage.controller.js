@@ -1,10 +1,163 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Garage = require("../Model/garage.model");
+const TempGarageRegistration = require("../Model/tempGarageRegistration.model");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
+const sendEmail = require("../Utils/mailer");
 require("dotenv").config();
 // const razorpay = require("../utils/razorpay");
+
+// Submit Registration (store in temp)
+const submitRegistration = async (req, res) => {
+  try {
+    const {
+      name,
+      address,
+      phone,
+      email,
+      password,
+      gstNum,
+      panNum,
+      bankDetails,
+    } = req.body;
+
+    // Check if garage already exists
+    const existingGarage = await Garage.findOne({ email });
+    if (existingGarage) {
+      return res.status(400).json({ message: "Garage already exists" });
+    }
+
+    // Check if temp registration exists
+    const existingTemp = await TempGarageRegistration.findOne({ email });
+    if (existingTemp) {
+      await TempGarageRegistration.deleteOne({ email });
+    }
+
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Store in temp collection
+    const tempRegistration = new TempGarageRegistration({
+      name,
+      address,
+      phone,
+      email,
+      password: hashedPassword,
+      gstNum,
+      panNum,
+      bankDetails,
+      otp,
+      otpExpiresAt,
+    });
+
+    await tempRegistration.save();
+
+    // Send OTP email
+    await sendEmail(
+      email,
+      "Verify Your Garage Registration",
+      `Your OTP code is: ${otp}. Valid for 10 minutes.`
+    );
+
+    res.status(200).json({
+      message: "Registration submitted. Please check your email for OTP.",
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+// Verify OTP and Create Garage
+const verifyRegistrationOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const tempRegistration = await TempGarageRegistration.findOne({
+      email,
+      otp,
+      isVerified: false,
+    });
+
+    if (!tempRegistration) {
+      return res.status(400).json({ message: "Invalid OTP or email" });
+    }
+
+    if (tempRegistration.otpExpiresAt < new Date()) {
+      return res.status(400).json({ message: "OTP has expired" });
+    }
+
+    // Create actual garage
+    const newGarage = new Garage({
+      name: tempRegistration.name,
+      address: tempRegistration.address,
+      phone: tempRegistration.phone,
+      email: tempRegistration.email,
+      password: tempRegistration.password,
+      gstNum: tempRegistration.gstNum,
+      panNum: tempRegistration.panNum,
+      bankDetails: tempRegistration.bankDetails,
+      isVerified: true,
+    });
+
+    await newGarage.save();
+
+    // Delete temp registration
+    await TempGarageRegistration.deleteOne({ email });
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { garageId: newGarage._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.status(201).json({
+      message: "Garage registered successfully and verified!",
+      garage: newGarage,
+      token,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+// Resend Registration OTP
+const sendRegistrationOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const tempRegistration = await TempGarageRegistration.findOne({ email });
+    if (!tempRegistration) {
+      return res.status(404).json({
+        message: "No pending registration found for this email",
+      });
+    }
+
+    // Generate new OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    tempRegistration.otp = otp;
+    tempRegistration.otpExpiresAt = otpExpiresAt;
+    await tempRegistration.save();
+
+    // Send OTP email
+    await sendEmail(
+      email,
+      "Your Registration OTP",
+      `Your OTP code is: ${otp}. Valid for 10 minutes.`
+    );
+
+    res.status(200).json({ message: "OTP sent to your email" });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
 
 const createGarage = async (req, res) => {
   try {
@@ -305,4 +458,7 @@ module.exports = {
   updateGarage,
   deleteGarage,
   getMe,
+  submitRegistration,
+  verifyRegistrationOTP,
+  sendRegistrationOTP,
 };

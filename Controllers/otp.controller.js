@@ -1,10 +1,21 @@
 const Otp = require("../Model/otp.model");
 const Garage = require("../Model/garage.model");
+const TempGarageRegistration = require("../Model/tempGarageRegistration.model");
 const sendEmail = require("../Utils/mailer");
 const bcrypt = require("bcrypt");
+
 const sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
+
+    // First check if it's a pending registration
+    const tempRegistration = await TempGarageRegistration.findOne({ email });
+    if (tempRegistration) {
+      return res.status(400).json({
+        message: "Please use /resend-otp endpoint for pending registrations",
+      });
+    }
+
     const garage = await Garage.findOne({ email });
 
     if (!garage) {
@@ -70,32 +81,37 @@ const verifyOtp = async (req, res) => {
   }
 };
 
-// 3. Reset Password (only if OTP verified)
+// 3. Reset Password
 const resetPassword = async (req, res) => {
   try {
-    const { email, newPassword } = req.body;
-
+    const { email, otp, newPassword } = req.body;
     const otpRecord = await Otp.findOne({ email });
+    const garage = await Garage.findOne({ email });
+
     if (!otpRecord || !otpRecord.isVerified) {
-      return res.status(400).json({ message: "OTP not verified or expired" });
+      return res.status(400).json({ message: "Invalid or unverified OTP" });
     }
 
-    const garage = await Garage.findOne({ email });
     if (!garage) {
       return res.status(404).json({ message: "Garage not found" });
     }
 
+    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     garage.password = hashedPassword;
     await garage.save();
 
-    // Remove OTP record after successful reset
+    // Clean up OTP
     // await Otp.deleteMany({ email });
 
-    res.status(200).json({ message: "Password reset successful" });
+    res.status(200).json({ message: "Password reset successfully" });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
 
-module.exports = { sendOtp, verifyOtp, resetPassword };
+module.exports = {
+  sendOtp,
+  verifyOtp,
+  resetPassword,
+};
