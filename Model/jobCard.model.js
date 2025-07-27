@@ -34,6 +34,11 @@ const JobCardSchema = new mongoose.Schema(
     },
     // Add jobId for PDF and details
     jobId: { type: String },
+    // Track which employee created this jobcard
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     generateBill: { type: Boolean, default: false },
     images: [{ type: String }],
     video: { type: String },

@@ -107,9 +107,15 @@ const createJobCard = async (req, res) => {
 
     await newJobCard.save();
 
+    // Populate creator info for response
+    const populatedJobCard = await JobCard.findById(newJobCard._id).populate(
+      "createdBy",
+      "name email role"
+    );
+
     res.status(201).json({
       message: "Job Card created successfully",
-      jobCard: newJobCard,
+      jobCard: populatedJobCard,
     });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
@@ -127,9 +133,15 @@ const updateGenerateBillStatus = async (req, res) => {
     jobCard.generateBill = true;
     await jobCard.save();
 
+    // Populate creator info for response
+    const populatedJobCard = await JobCard.findById(jobCard._id).populate(
+      "createdBy",
+      "name email role"
+    );
+
     res.status(200).json({
       message: "Job Card bill status updated to true",
-      jobCard,
+      jobCard: populatedJobCard,
     });
   } catch (error) {
     console.error("Error updating bill status:", error);
@@ -140,8 +152,6 @@ const updateGenerateBillStatus = async (req, res) => {
 const getJobCardsByGarage = async (req, res) => {
   try {
     const { garageId } = req.params;
-
-    // Check if garage exists
     const garage = await Garage.findById(garageId);
     if (!garage) {
       return res.status(404).json({ message: "Garage not found , test two" });
@@ -154,8 +164,9 @@ const getJobCardsByGarage = async (req, res) => {
     ) {
       filter.createdBy = req.user._id;
     }
-
-    const jobCards = await JobCard.find(filter).populate("engineerId", "name");
+    const jobCards = await JobCard.find(filter)
+      .populate("engineerId", "name")
+      .populate("createdBy", "name email role"); // Populate creator info
     res.status(200).json(jobCards);
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
@@ -174,15 +185,12 @@ const getJobCardById = async (req, res) => {
     ) {
       filter.createdBy = req.user._id;
     }
-    const jobCard = await JobCard.findOne(filter).populate(
-      "engineerId",
-      "name"
-    );
-
+    const jobCard = await JobCard.findOne(filter)
+      .populate("engineerId", "name")
+      .populate("createdBy", "name email role"); // Populate creator info
     if (!jobCard) {
       return res.status(404).json({ message: "Job Card not found" });
     }
-
     res.status(200).json(jobCard);
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
