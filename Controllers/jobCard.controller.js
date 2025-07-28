@@ -103,7 +103,16 @@ const createJobCard = async (req, res) => {
 
     // Generate jobId (e.g., JC-<timestamp>)
     const jobId = `JC-${Date.now()}`;
-    const createdBy = req.garage._id; // Use garage ID as creator
+
+    // Store user information in createdBy if available, otherwise use garage info
+    let createdBy = req.garage._id; // Default to garage ID
+    let createdByModel = "Garage"; // Default to garage
+
+    // If we have user information in the request, use that instead
+    if (req.user && req.user._id) {
+      createdBy = req.user._id;
+      createdByModel = "User";
+    }
 
     const newJobCard = new JobCard({
       garageId,
@@ -128,16 +137,17 @@ const createJobCard = async (req, res) => {
       status: "In Progress",
       engineerId: null,
       jobId, // Added jobId
-      createdBy, // Track creator (garage ID)
+      createdBy, // Track creator (user ID or garage ID)
+      createdByModel, // Track whether creator is user or garage
     });
 
     await newJobCard.save();
 
     // Populate creator info for response
-    const populatedJobCard = await JobCard.findById(newJobCard._id).populate(
-      "createdBy",
-      "name email"
-    );
+    const populatedJobCard = await JobCard.findById(newJobCard._id).populate({
+      path: "createdBy",
+      select: "name email role",
+    });
 
     res.status(201).json({
       message: "Job Card created successfully",
@@ -178,10 +188,10 @@ const updateGenerateBillStatus = async (req, res) => {
     await jobCard.save();
 
     // Populate creator info for response
-    const populatedJobCard = await JobCard.findById(jobCard._id).populate(
-      "createdBy",
-      "name email"
-    );
+    const populatedJobCard = await JobCard.findById(jobCard._id).populate({
+      path: "createdBy",
+      select: "name email role",
+    });
 
     res.status(200).json({
       message: "Job Card bill status updated to true",
@@ -230,7 +240,10 @@ const getJobCardsByGarage = async (req, res) => {
 
     const jobCards = await JobCard.find(filter)
       .populate("engineerId", "name")
-      .populate("createdBy", "name email"); // Populate creator info
+      .populate({
+        path: "createdBy",
+        select: "name email role",
+      }); // Populate creator info
     res.status(200).json(jobCards);
   } catch (error) {
     console.error("getJobCardsByGarage error:", error);
@@ -265,7 +278,10 @@ const getJobCardById = async (req, res) => {
       garageId: req.garage._id,
     })
       .populate("engineerId", "name")
-      .populate("createdBy", "name email"); // Populate creator info
+      .populate({
+        path: "createdBy",
+        select: "name email role",
+      }); // Populate creator info
 
     if (!jobCard) {
       return res.status(404).json({ message: "Job Card not found" });

@@ -37,7 +37,12 @@ const JobCardSchema = new mongoose.Schema(
     // Track which employee created this jobcard
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      refPath: "createdByModel",
+    },
+    createdByModel: {
+      type: String,
+      enum: ["User", "Garage"],
+      default: "User",
     },
     generateBill: { type: Boolean, default: false },
     images: [{ type: String }],
