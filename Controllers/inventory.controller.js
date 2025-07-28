@@ -1,4 +1,10 @@
 const Inventory = require("../Model/inventory.model");
+const mongoose = require("mongoose");
+
+// Helper function to validate ObjectId
+const isValidObjectId = (id) => {
+  return mongoose.Types.ObjectId.isValid(id);
+};
 
 // Add new part
 const addPart = async (req, res) => {
@@ -32,6 +38,14 @@ const addPart = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    // Validate garageId
+    if (!isValidObjectId(garageId)) {
+      return res.status(400).json({
+        message:
+          "Invalid garage ID format. Please provide a valid 24-character ObjectId.",
+      });
+    }
+
     const part = new Inventory({
       garageId,
       carName,
@@ -61,6 +75,15 @@ const addPart = async (req, res) => {
 const getPartsByGarage = async (req, res) => {
   try {
     const { garageId } = req.params;
+
+    // Validate garageId
+    if (!isValidObjectId(garageId)) {
+      return res.status(400).json({
+        message:
+          "Invalid garage ID format. Please provide a valid 24-character ObjectId.",
+      });
+    }
+
     const parts = await Inventory.find({ garageId });
     res.status(200).json(parts);
   } catch (error) {
@@ -74,6 +97,15 @@ const getPartsByGarage = async (req, res) => {
 const updatePart = async (req, res) => {
   try {
     const { partId } = req.params;
+
+    // Validate partId
+    if (!isValidObjectId(partId)) {
+      return res.status(400).json({
+        message:
+          "Invalid part ID format. Please provide a valid 24-character ObjectId.",
+      });
+    }
+
     const {
       carName,
       model,
@@ -104,6 +136,11 @@ const updatePart = async (req, res) => {
     const updated = await Inventory.findByIdAndUpdate(partId, updateFields, {
       new: true,
     });
+
+    if (!updated) {
+      return res.status(404).json({ message: "Part not found" });
+    }
+
     res
       .status(200)
       .json({ message: "Part updated successfully", data: updated });
@@ -118,7 +155,21 @@ const updatePart = async (req, res) => {
 const deletePart = async (req, res) => {
   try {
     const { partId } = req.params;
-    await Inventory.findByIdAndDelete(partId);
+
+    // Validate partId
+    if (!isValidObjectId(partId)) {
+      return res.status(400).json({
+        message:
+          "Invalid part ID format. Please provide a valid 24-character ObjectId.",
+      });
+    }
+
+    const deletedPart = await Inventory.findByIdAndDelete(partId);
+
+    if (!deletedPart) {
+      return res.status(404).json({ message: "Part not found" });
+    }
+
     res.status(200).json({ message: "Part deleted successfully" });
   } catch (error) {
     res

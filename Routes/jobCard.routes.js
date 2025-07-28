@@ -16,90 +16,56 @@ const {
 const upload = require("../Middlewares/upload");
 const authGarage = require("../Middlewares/garageauth.middleware");
 const checkPermission = require("../Middlewares/checkpermission");
-const auth = require("../Middlewares/auth");
 
 const router = express.Router();
 
-// router.use(authGarage);
-
 // Get all Job Cards for a Garage
-router.get(
-  "/garage/:garageId",
-  auth(["super-admin", "admin", "manager", "staff"]),
-  // checkPermission("jobcard:view"),
-  getJobCardsByGarage
-);
+router.get("/garage/:garageId", authGarage, getJobCardsByGarage);
 
 // Create Job Card with images
 router.post(
   "/add",
-  auth(["super-admin", "admin", "manager", "staff"]),
-  // checkPermission("jobcard:create"),
+  authGarage,
   upload.fields([
     { name: "images", maxCount: 5 },
     { name: "video", maxCount: 1 },
   ]),
   createJobCard
 );
+
 router.put(
   "/updatebillstatus/:jobCardId",
-  auth(["super-admin", "admin", "manager", "staff"]),
+  authGarage,
   updateGenerateBillStatus
 );
-router.put(
-  "/updatestatus/:jobCardId",
-  auth(["super-admin", "admin", "manager", "staff"]),
-  updateJobStatus
-);
+
+router.put("/updatestatus/:jobCardId", authGarage, updateJobStatus);
 
 // Get Single Job Card
-router.get(
-  "/:jobCardId",
-  auth(["super-admin", "admin", "manager", "staff"]),
-  getJobCardById
-);
+router.get("/:jobCardId", authGarage, getJobCardById);
 
 // Update Job Card
-router.put(
-  "/:jobCardId",
-  auth(["super-admin", "admin", "manager", "staff"]),
-  updateJobCard
-);
+router.put("/:jobCardId", authGarage, updateJobCard);
 
 // Delete Job Card
-router.delete(
-  "/:jobCardId",
-  auth(["super-admin", "admin", "manager", "staff"]),
-  deleteJobCard
-);
+router.delete("/:jobCardId", authGarage, deleteJobCard);
 
 // Assign Engineer
-router.put(
-  "/assign-engineer/:jobCardId",
-  auth(["super-admin", "admin", "manager"]),
-  // checkPermission("jobcard:assign_engineer"),
-  assignEngineer
-);
+router.put("/assign-engineer/:jobCardId", authGarage, assignEngineer);
+
 router.put(
   "/assign-jobcards/:engineerId",
-  auth(["super-admin", "admin", "manager"]),
-  // checkPermission("jobcard:assign_engineer"),
+  authGarage,
   assignJobCardsToEngineer
 );
 
 // Log Work Progress
-router.put(
-  "/jobcard/:jobCardId/workprogress",
-  auth(["super-admin", "admin", "manager", "staff"]),
-  // checkPermission("jobcard:log_work"),
-  logWorkProgress
-);
+router.put("/jobcard/:jobCardId/workprogress", authGarage, logWorkProgress);
 
 // Quality Check
 router.put(
   "/jobcard/:jobCardId/qualitycheck",
-  auth(["super-admin", "admin", "manager", "staff"]),
-  // checkPermission("jobcard:quality_check"),
+  authGarage,
   qualityCheckByEngineer
 );
 

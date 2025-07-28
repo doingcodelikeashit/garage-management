@@ -1,6 +1,12 @@
 const JobCard = require("../Model/jobCard.model");
 const Garage = require("../Model/garage.model");
 const Engineer = require("../Model/engineer.model");
+const mongoose = require("mongoose");
+
+// Helper function to validate ObjectId
+const isValidObjectId = (id) => {
+  return mongoose.Types.ObjectId.isValid(id);
+};
 
 // ➤ Create a Job Card (Engineer not assigned initially)
 // const createJobCard = async (req, res) => {
@@ -70,6 +76,26 @@ const createJobCard = async (req, res) => {
     const images = req.files?.images?.map((file) => file.path) || [];
     const video = req.files?.video?.[0]?.path || null;
 
+    // Validate garageId
+    if (!isValidObjectId(garageId)) {
+      return res.status(400).json({ message: "Invalid garage ID format" });
+    }
+
+    // Check if req.garage exists (from garage authentication)
+    if (!req.garage || !req.garage._id) {
+      return res.status(401).json({
+        message:
+          "Authentication required. Please provide a valid garage JWT token.",
+      });
+    }
+
+    // Verify that the authenticated garage matches the garageId in request
+    if (req.garage._id.toString() !== garageId) {
+      return res.status(403).json({
+        message: "You can only create job cards for your own garage.",
+      });
+    }
+
     const garage = await Garage.findById(garageId);
     if (!garage) {
       return res.status(404).json({ message: "Garage not found" });
@@ -77,7 +103,7 @@ const createJobCard = async (req, res) => {
 
     // Generate jobId (e.g., JC-<timestamp>)
     const jobId = `JC-${Date.now()}`;
-    const createdBy = req.user._id; // req.user is now guaranteed to exist due to auth middleware
+    const createdBy = req.garage._id; // Use garage ID as creator
 
     const newJobCard = new JobCard({
       garageId,
@@ -102,7 +128,7 @@ const createJobCard = async (req, res) => {
       status: "In Progress",
       engineerId: null,
       jobId, // Added jobId
-      createdBy, // Track creator
+      createdBy, // Track creator (garage ID)
     });
 
     await newJobCard.save();
@@ -110,7 +136,7 @@ const createJobCard = async (req, res) => {
     // Populate creator info for response
     const populatedJobCard = await JobCard.findById(newJobCard._id).populate(
       "createdBy",
-      "name email role"
+      "name email"
     );
 
     res.status(201).json({
@@ -118,6 +144,7 @@ const createJobCard = async (req, res) => {
       jobCard: populatedJobCard,
     });
   } catch (error) {
+    console.error("createJobCard error:", error);
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
@@ -125,7 +152,24 @@ const updateGenerateBillStatus = async (req, res) => {
   try {
     const { jobCardId } = req.params;
 
-    const jobCard = await JobCard.findById(jobCardId);
+    // Validate jobCardId
+    if (!isValidObjectId(jobCardId)) {
+      return res.status(400).json({ message: "Invalid job card ID format" });
+    }
+
+    // Check if req.garage exists (from garage authentication)
+    if (!req.garage || !req.garage._id) {
+      return res.status(401).json({
+        message:
+          "Authentication required. Please provide a valid garage JWT token.",
+      });
+    }
+
+    // Find job card, ensuring it belongs to the authenticated garage
+    const jobCard = await JobCard.findOne({
+      _id: jobCardId,
+      garageId: req.garage._id,
+    });
     if (!jobCard) {
       return res.status(404).json({ message: "Job Card not found" });
     }
@@ -136,7 +180,7 @@ const updateGenerateBillStatus = async (req, res) => {
     // Populate creator info for response
     const populatedJobCard = await JobCard.findById(jobCard._id).populate(
       "createdBy",
-      "name email role"
+      "name email"
     );
 
     res.status(200).json({
@@ -152,19 +196,44 @@ const updateGenerateBillStatus = async (req, res) => {
 const getJobCardsByGarage = async (req, res) => {
   try {
     const { garageId } = req.params;
+
+    // Validate garageId
+    if (!isValidObjectId(garageId)) {
+      return res.status(400).json({
+        message:
+          "Invalid garage ID format. Please provide a valid 24-character ObjectId.",
+      });
+    }
+
+    // Check if req.garage exists (from garage authentication)
+    if (!req.garage || !req.garage._id) {
+      return res.status(401).json({
+        message:
+          "Authentication required. Please provide a valid garage JWT token.",
+      });
+    }
+
+    // Verify that the authenticated garage matches the garageId in request
+    if (req.garage._id.toString() !== garageId) {
+      return res.status(403).json({
+        message: "You can only view job cards for your own garage.",
+      });
+    }
+
     const garage = await Garage.findById(garageId);
     if (!garage) {
-      return res.status(404).json({ message: "Garage not found , test two" });
+      return res.status(404).json({ message: "Garage not found" });
     }
-    let filter = { garageId };
-    if (req.user.role !== "admin" && req.user.role !== "super-admin") {
-      filter.createdBy = req.user._id;
-    }
+
+    // Since we're using garage authentication, all job cards belong to this garage
+    const filter = { garageId };
+
     const jobCards = await JobCard.find(filter)
       .populate("engineerId", "name")
-      .populate("createdBy", "name email role"); // Populate creator info
+      .populate("createdBy", "name email"); // Populate creator info
     res.status(200).json(jobCards);
   } catch (error) {
+    console.error("getJobCardsByGarage error:", error);
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
@@ -173,18 +242,38 @@ const getJobCardsByGarage = async (req, res) => {
 const getJobCardById = async (req, res) => {
   try {
     const { jobCardId } = req.params;
-    let filter = { _id: jobCardId };
-    if (req.user.role !== "admin" && req.user.role !== "super-admin") {
-      filter.createdBy = req.user._id;
+
+    // Validate jobCardId
+    if (!isValidObjectId(jobCardId)) {
+      return res.status(400).json({
+        message:
+          "Invalid job card ID format. Please provide a valid 24-character ObjectId.",
+      });
     }
-    const jobCard = await JobCard.findOne(filter)
+
+    // Check if req.garage exists (from garage authentication)
+    if (!req.garage || !req.garage._id) {
+      return res.status(401).json({
+        message:
+          "Authentication required. Please provide a valid garage JWT token.",
+      });
+    }
+
+    // Find job card and verify it belongs to the authenticated garage
+    const jobCard = await JobCard.findOne({
+      _id: jobCardId,
+      garageId: req.garage._id,
+    })
       .populate("engineerId", "name")
-      .populate("createdBy", "name email role"); // Populate creator info
+      .populate("createdBy", "name email"); // Populate creator info
+
     if (!jobCard) {
       return res.status(404).json({ message: "Job Card not found" });
     }
+
     res.status(200).json(jobCard);
   } catch (error) {
+    console.error("getJobCardById error:", error);
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
@@ -193,6 +282,23 @@ const getJobCardById = async (req, res) => {
 const updateJobCard = async (req, res) => {
   try {
     const { jobCardId } = req.params;
+
+    // Validate jobCardId
+    if (!isValidObjectId(jobCardId)) {
+      return res.status(400).json({
+        message:
+          "Invalid job card ID format. Please provide a valid 24-character ObjectId.",
+      });
+    }
+
+    // Check if req.garage exists (from garage authentication)
+    if (!req.garage || !req.garage._id) {
+      return res.status(401).json({
+        message:
+          "Authentication required. Please provide a valid garage JWT token.",
+      });
+    }
+
     const updates = req.body; // Fields to update
 
     // Only allow updating allowed fields
@@ -223,12 +329,11 @@ const updateJobCard = async (req, res) => {
       if (updates[key] !== undefined) filteredUpdates[key] = updates[key];
     }
 
-    const jobCard = await JobCard.findByIdAndUpdate(
-      jobCardId,
+    // Find and update job card, ensuring it belongs to the authenticated garage
+    const jobCard = await JobCard.findOneAndUpdate(
+      { _id: jobCardId, garageId: req.garage._id },
       filteredUpdates,
-      {
-        new: true,
-      }
+      { new: true }
     );
 
     if (!jobCard) {
@@ -245,7 +350,28 @@ const updateJobCard = async (req, res) => {
 const deleteJobCard = async (req, res) => {
   try {
     const { jobCardId } = req.params;
-    const jobCard = await JobCard.findByIdAndDelete(jobCardId);
+
+    // Validate jobCardId
+    if (!isValidObjectId(jobCardId)) {
+      return res.status(400).json({
+        message:
+          "Invalid job card ID format. Please provide a valid 24-character ObjectId.",
+      });
+    }
+
+    // Check if req.garage exists (from garage authentication)
+    if (!req.garage || !req.garage._id) {
+      return res.status(401).json({
+        message:
+          "Authentication required. Please provide a valid garage JWT token.",
+      });
+    }
+
+    // Find and delete job card, ensuring it belongs to the authenticated garage
+    const jobCard = await JobCard.findOneAndDelete({
+      _id: jobCardId,
+      garageId: req.garage._id,
+    });
 
     if (!jobCard) {
       return res.status(404).json({ message: "Job Card not found" });
@@ -263,6 +389,22 @@ const assignEngineer = async (req, res) => {
     const { jobCardId } = req.params;
     const { engineerId } = req.body;
 
+    // Validate jobCardId
+    if (!isValidObjectId(jobCardId)) {
+      return res.status(400).json({
+        message:
+          "Invalid job card ID format. Please provide a valid 24-character ObjectId.",
+      });
+    }
+
+    // Check if req.garage exists (from garage authentication)
+    if (!req.garage || !req.garage._id) {
+      return res.status(401).json({
+        message:
+          "Authentication required. Please provide a valid garage JWT token.",
+      });
+    }
+
     // Validate input
     if (!Array.isArray(engineerId) || engineerId.length === 0) {
       return res
@@ -270,8 +412,20 @@ const assignEngineer = async (req, res) => {
         .json({ message: "Please provide an array of engineerIds" });
     }
 
-    // Find Job Card
-    const jobCard = await JobCard.findById(jobCardId);
+    // Validate each engineerId
+    for (const id of engineerId) {
+      if (!isValidObjectId(id)) {
+        return res.status(400).json({
+          message: `Invalid engineer ID format: ${id}. Please provide a valid 24-character ObjectId.`,
+        });
+      }
+    }
+
+    // Find Job Card, ensuring it belongs to the authenticated garage
+    const jobCard = await JobCard.findOne({
+      _id: jobCardId,
+      garageId: req.garage._id,
+    });
     if (!jobCard) {
       return res.status(404).json({ message: "Job Card not found" });
     }
@@ -279,7 +433,7 @@ const assignEngineer = async (req, res) => {
     // Validate Engineers and garage match
     const engineers = await Engineer.find({
       _id: { $in: engineerId },
-      garageId: jobCard.garageId,
+      garageId: req.garage._id,
     });
 
     if (engineers.length !== engineerId.length) {
@@ -306,21 +460,49 @@ const assignJobCardsToEngineer = async (req, res) => {
     const { engineerId } = req.params;
     const { jobCardIds } = req.body;
 
+    // Validate engineerId
+    if (!isValidObjectId(engineerId)) {
+      return res.status(400).json({
+        message:
+          "Invalid engineer ID format. Please provide a valid 24-character ObjectId.",
+      });
+    }
+
+    // Check if req.garage exists (from garage authentication)
+    if (!req.garage || !req.garage._id) {
+      return res.status(401).json({
+        message:
+          "Authentication required. Please provide a valid garage JWT token.",
+      });
+    }
+
     if (!Array.isArray(jobCardIds) || jobCardIds.length === 0) {
       return res
         .status(400)
         .json({ message: "Provide an array of jobCardIds" });
     }
 
-    const engineer = await Engineer.findById(engineerId);
+    // Validate each jobCardId
+    for (const id of jobCardIds) {
+      if (!isValidObjectId(id)) {
+        return res.status(400).json({
+          message: `Invalid job card ID format: ${id}. Please provide a valid 24-character ObjectId.`,
+        });
+      }
+    }
+
+    const engineer = await Engineer.findOne({
+      _id: engineerId,
+      garageId: req.garage._id,
+    });
     if (!engineer) {
       return res.status(404).json({ message: "Engineer not found" });
     }
 
-    // Update JobCards to include this engineer
+    // Update JobCards to include this engineer, ensuring they belong to the authenticated garage
     await JobCard.updateMany(
-      { _id: { $in: jobCardIds } },
-      { $set: { engineerId: engineerId } } // Prevent duplicates
+      { _id: { $in: jobCardIds }, garageId: req.garage._id },
+      { $set: { engineerId: engineerId } }
     );
 
     // Optional: Update Engineer to include jobCards (if using assignedJobCards field)
@@ -339,7 +521,27 @@ const updateJobStatus = async (req, res) => {
     const { jobCardId } = req.params;
     const { status } = req.body;
 
-    const jobCard = await JobCard.findById(jobCardId);
+    // Validate jobCardId
+    if (!isValidObjectId(jobCardId)) {
+      return res.status(400).json({
+        message:
+          "Invalid job card ID format. Please provide a valid 24-character ObjectId.",
+      });
+    }
+
+    // Check if req.garage exists (from garage authentication)
+    if (!req.garage || !req.garage._id) {
+      return res.status(401).json({
+        message:
+          "Authentication required. Please provide a valid garage JWT token.",
+      });
+    }
+
+    // Find job card, ensuring it belongs to the authenticated garage
+    const jobCard = await JobCard.findOne({
+      _id: jobCardId,
+      garageId: req.garage._id,
+    });
     if (!jobCard) {
       return res.status(404).json({ message: "Job Card not found" });
     }
@@ -360,7 +562,27 @@ const logWorkProgress = async (req, res) => {
     const { jobCardId } = req.params;
     const { partsUsed, laborHours, engineerRemarks, status } = req.body;
 
-    const jobCard = await JobCard.findById(jobCardId);
+    // Validate jobCardId
+    if (!isValidObjectId(jobCardId)) {
+      return res.status(400).json({
+        message:
+          "Invalid job card ID format. Please provide a valid 24-character ObjectId.",
+      });
+    }
+
+    // Check if req.garage exists (from garage authentication)
+    if (!req.garage || !req.garage._id) {
+      return res.status(401).json({
+        message:
+          "Authentication required. Please provide a valid garage JWT token.",
+      });
+    }
+
+    // Find job card, ensuring it belongs to the authenticated garage
+    const jobCard = await JobCard.findOne({
+      _id: jobCardId,
+      garageId: req.garage._id,
+    });
     if (!jobCard)
       return res.status(404).json({ message: "Job Card not found" });
 
@@ -386,7 +608,27 @@ const qualityCheckByEngineer = async (req, res) => {
     const { jobCardId } = req.params;
     const { notes } = req.body;
 
-    const jobCard = await JobCard.findById(jobCardId);
+    // Validate jobCardId
+    if (!isValidObjectId(jobCardId)) {
+      return res.status(400).json({
+        message:
+          "Invalid job card ID format. Please provide a valid 24-character ObjectId.",
+      });
+    }
+
+    // Check if req.garage exists (from garage authentication)
+    if (!req.garage || !req.garage._id) {
+      return res.status(401).json({
+        message:
+          "Authentication required. Please provide a valid garage JWT token.",
+      });
+    }
+
+    // Find job card, ensuring it belongs to the authenticated garage
+    const jobCard = await JobCard.findOne({
+      _id: jobCardId,
+      garageId: req.garage._id,
+    });
     if (!jobCard)
       return res.status(404).json({ message: "Job Card not found" });
 
