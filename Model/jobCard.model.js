@@ -34,6 +34,8 @@ const JobCardSchema = new mongoose.Schema(
     },
     // Add jobId for PDF and details
     jobId: { type: String },
+    // Add sequential job card number per garage
+    jobCardNumber: { type: Number, required: true },
     // Track which employee created this jobcard
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

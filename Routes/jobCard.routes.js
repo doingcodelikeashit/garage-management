@@ -11,6 +11,7 @@ const {
   qualityCheckByEngineer,
   updateJobStatus,
   updateGenerateBillStatus,
+  getNextJobCardNumber,
 } = require("../Controllers/jobCard.controller");
 
 const upload = require("../Middlewares/upload");
@@ -21,6 +22,9 @@ const router = express.Router();
 
 // Get all Job Cards for a Garage
 router.get("/garage/:garageId", authGarage, getJobCardsByGarage);
+
+// Get next job card number for a garage
+router.get("/next-number/:garageId", authGarage, getNextJobCardNumber);
 
 // Create Job Card with images
 router.post(

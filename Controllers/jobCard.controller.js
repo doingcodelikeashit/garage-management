@@ -101,6 +101,13 @@ const createJobCard = async (req, res) => {
       return res.status(404).json({ message: "Garage not found" });
     }
 
+    // Generate sequential job card number for this garage
+    const lastJobCard = await JobCard.findOne({ garageId })
+      .sort({ jobCardNumber: -1 })
+      .select("jobCardNumber");
+
+    const jobCardNumber = lastJobCard ? lastJobCard.jobCardNumber + 1 : 1;
+
     // Generate jobId (e.g., JC-<timestamp>)
     const jobId = `JC-${Date.now()}`;
 
@@ -137,6 +144,7 @@ const createJobCard = async (req, res) => {
       status: "In Progress",
       engineerId: null,
       jobId, // Added jobId
+      jobCardNumber, // Sequential number per garage
       createdBy, // Track creator (user ID or garage ID)
       createdByModel, // Track whether creator is user or garage
     });
@@ -673,6 +681,58 @@ const qualityCheckByEngineer = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: err.message });
   }
 };
+
+// ➤ Get Next Job Card Number for a Garage
+const getNextJobCardNumber = async (req, res) => {
+  try {
+    const { garageId } = req.params;
+
+    // Validate garageId
+    if (!isValidObjectId(garageId)) {
+      return res.status(400).json({
+        message:
+          "Invalid garage ID format. Please provide a valid 24-character ObjectId.",
+      });
+    }
+
+    // Check if req.garage exists (from garage authentication)
+    if (!req.garage || !req.garage._id) {
+      return res.status(401).json({
+        message:
+          "Authentication required. Please provide a valid garage JWT token.",
+      });
+    }
+
+    // Verify that the authenticated garage matches the garageId in request
+    if (req.garage._id.toString() !== garageId) {
+      return res.status(403).json({
+        message: "You can only get job card numbers for your own garage.",
+      });
+    }
+
+    const garage = await Garage.findById(garageId);
+    if (!garage) {
+      return res.status(404).json({ message: "Garage not found" });
+    }
+
+    // Get the highest job card number for this garage
+    const lastJobCard = await JobCard.findOne({ garageId })
+      .sort({ jobCardNumber: -1 })
+      .select("jobCardNumber");
+
+    const nextJobCardNumber = lastJobCard ? lastJobCard.jobCardNumber + 1 : 1;
+
+    res.status(200).json({
+      garageId,
+      nextJobCardNumber,
+      message: `Next job card number for garage ${garage.name}`,
+    });
+  } catch (error) {
+    console.error("getNextJobCardNumber error:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
 module.exports = {
   createJobCard,
   updateGenerateBillStatus,
@@ -685,4 +745,5 @@ module.exports = {
   updateJobStatus,
   logWorkProgress,
   qualityCheckByEngineer,
+  getNextJobCardNumber, // Add the new function
 };
