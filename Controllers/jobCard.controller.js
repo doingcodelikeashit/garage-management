@@ -77,7 +77,7 @@ const createJobCard = async (req, res) => {
 
     // Generate jobId (e.g., JC-<timestamp>)
     const jobId = `JC-${Date.now()}`;
-    const createdBy = req.user ? req.user._id : null;
+    const createdBy = req.user._id; // req.user is now guaranteed to exist due to auth middleware
 
     const newJobCard = new JobCard({
       garageId,
@@ -157,11 +157,7 @@ const getJobCardsByGarage = async (req, res) => {
       return res.status(404).json({ message: "Garage not found , test two" });
     }
     let filter = { garageId };
-    if (
-      req.user &&
-      req.user.role !== "admin" &&
-      req.user.role !== "super-admin"
-    ) {
+    if (req.user.role !== "admin" && req.user.role !== "super-admin") {
       filter.createdBy = req.user._id;
     }
     const jobCards = await JobCard.find(filter)
@@ -178,11 +174,7 @@ const getJobCardById = async (req, res) => {
   try {
     const { jobCardId } = req.params;
     let filter = { _id: jobCardId };
-    if (
-      req.user &&
-      req.user.role !== "admin" &&
-      req.user.role !== "super-admin"
-    ) {
+    if (req.user.role !== "admin" && req.user.role !== "super-admin") {
       filter.createdBy = req.user._id;
     }
     const jobCard = await JobCard.findOne(filter)
