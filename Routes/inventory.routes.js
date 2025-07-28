@@ -5,6 +5,9 @@ const {
   getPartsByGarage,
   updatePart,
   deletePart,
+  getInventoryReport,
+  getLowStockAlert,
+  getInventorySummary,
 } = require("../Controllers/inventory.controller");
 
 const authGarage = require("../Middlewares/garageauth.middleware");
@@ -30,5 +33,15 @@ router.delete(
   // checkPermission("inventory:delete"),
   deletePart
 );
+
+// ➤ Inventory Reports and Analytics
+// Get comprehensive inventory report
+router.get("/report/:garageId", getInventoryReport);
+
+// Get low stock alert report
+router.get("/low-stock/:garageId", getLowStockAlert);
+
+// Get inventory summary dashboard
+router.get("/summary/:garageId", getInventorySummary);
 
 module.exports = router;
