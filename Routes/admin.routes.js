@@ -2,62 +2,40 @@ const express = require("express");
 const router = express.Router();
 const adminController = require("../Controllers/admin.controller");
 const garageController = require("../Controllers/garage.controller");
-const auth = require("../Middlewares/auth");
-// const checkPermission = require("../Middlewares/checkpermission");
-const { verifyToken } = require("../Middlewares/adminAuth");
-// router.use("/plan", verifyToken, require("./plan.routes"));
+const { adminAuth } = require("../Middlewares/auth");
 const planController = require("../Controllers/plan.controller");
-router.get("/plan", planController.getAllPlans);
-router.post("/plan", verifyToken, planController.createPlan);
-router.get("/plan/:id", verifyToken, planController.getPlanById);
-router.put("/plan/:id", verifyToken, planController.updatePlan);
-router.delete("/plan/:id", verifyToken, planController.deletePlan);
 
+// Plan management (Admin only)
+router.get("/plan", planController.getAllPlans);
+router.post("/plan", adminAuth(), planController.createPlan);
+router.get("/plan/:id", adminAuth(), planController.getPlanById);
+router.put("/plan/:id", adminAuth(), planController.updatePlan);
+router.delete("/plan/:id", adminAuth(), planController.deletePlan);
+
+// Admin authentication
 router.post("/login", adminController.login);
-router.put("/update/password", adminController.updatePassword);
-// Job Card History
+router.put("/update/password", adminAuth(), adminController.updatePassword);
+
+// Job Card History (Admin only)
 router.get(
   "/jobcardhistory",
-  verifyToken,
-  // checkPermission("jobcard:read"),
+  adminAuth(),
   adminController.getAllJobCardHistory
 );
-router.get("/allgarages", verifyToken, garageController.getAllGarages);
-// Garage Approval
-router.get(
-  "/garages/pending",
-  // auth(),
-  verifyToken,
-  // checkPermission("garage:read"),
-  adminController.getPendingGarages
-);
 
-router.put(
-  "/garages/approve/:id",
-  verifyToken,
-  // checkPermission("garage:approve"),
-  adminController.approveGarage
-);
-router.put(
-  "/garages/reject/:id",
-  verifyToken,
-  // checkPermission("garage:approve"),
-  adminController.rejectGarage
-);
-// Insurance
-router.post(
-  "/insurance/add",
-  verifyToken,
-  // auth(),
-  // checkPermission("insurance:add"),
-  adminController.addInsurance
-);
+// Garage management (Admin only)
+router.get("/allgarages", adminAuth(), garageController.getAllGarages);
 
+// Garage Approval (Admin only)
+router.get("/garages/pending", adminAuth(), adminController.getPendingGarages);
+router.put("/garages/approve/:id", adminAuth(), adminController.approveGarage);
+router.put("/garages/reject/:id", adminAuth(), adminController.rejectGarage);
+
+// Insurance management (Admin only)
+router.post("/insurance/add", adminAuth(), adminController.addInsurance);
 router.get(
   "/insurance/expiring",
-  verifyToken,
-  // auth(),
-  // checkPermission("insurance:view-expiring"),
+  adminAuth(),
   adminController.getExpiringInsurance
 );
 

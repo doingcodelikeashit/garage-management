@@ -1,36 +1,31 @@
 const express = require("express");
+const router = express.Router();
+const garageController = require("../Controllers/garage.controller");
 const {
-  createGarage,
   garageLogin,
   garageLogout,
-  renewGarageSubscription,
-  getGarageById,
-  getAllGarages,
-  updateGarage,
-  deleteGarage,
-  getMe,
-  updateGarageLogo,
+  createGarage,
   submitRegistration,
   verifyRegistrationOTP,
   sendRegistrationOTP,
-} = require("../Controllers/garage.controller");
-const taskController = require("../Controllers/task.controller");
-const authGarage = require("../Middlewares/garageauth.middleware");
-const checkPermission = require("../Middlewares/checkpermission");
-
-const router = express.Router();
-const {
+  renewGarageSubscription,
+  updateGarageLogo,
+  getAllGarages,
+  getMe,
+  getGarageById,
+  updateGarage,
+  deleteGarage,
   createUser,
-  userLogin,
   updatePermissions,
   deleteUser,
   getAllUsers,
   getUserById,
+  userLogin,
   getUserPermissions,
-} = require("../Controllers/superadmin.controller");
-const billingController = require("../Controllers/billing.controller");
+} = garageController;
 
-// Engineer Controllers
+const billingController = require("../Controllers/billing.controller");
+const taskController = require("../Controllers/task.controller");
 const {
   createEngineer,
   getEngineersByGarage,
@@ -58,7 +53,8 @@ const {
   logWorkProgress,
   qualityCheckByEngineer,
 } = require("../Controllers/jobCard.controller");
-const auth = require("../Middlewares/auth");
+const { auth, adminAuth } = require("../Middlewares/auth");
+
 // Public Route
 router.post("/login", garageLogin);
 router.post("/logout/:garageId", garageLogout);
@@ -72,14 +68,12 @@ router.use("/payment", require("./payment.routes"));
 router.post("/user/login", userLogin);
 router.get("/user/getpermission", auth(), getUserPermissions);
 router.get("/getgaragebyid/:id", getGarageById);
+
 // Protected Routes (Require Authentication)
-// Garage Management Routes (Role-based Access Control)
-router.put("/allgarages/:id", updateGarage);
-router.delete(
-  "/allgarages/:id",
-  // checkPermission("garage:delete"),
-  deleteGarage
-);
+// Garage Management Routes
+router.put("/allgarages/:id", auth(), updateGarage);
+router.delete("/allgarages/:id", adminAuth(), deleteGarage);
+
 router.post("/billing/generate/:jobCardId", billingController.generateBill);
 router.post("/billing/pay", billingController.processPayment);
 router.get("/billing/invoice", billingController.getInvoice);
@@ -111,25 +105,20 @@ router.put("/jobcards/:jobCardId/workprogress", logWorkProgress);
 router.put("/jobcards/:jobCardId/qualitycheck", qualityCheckByEngineer);
 
 router.post("/insurance/add", adminController.addInsurance);
-
 router.get("/insurance/expiring", adminController.getExpiringInsurance);
-router.use(authGarage);
+
+// Task routes (using garage auth)
 router.post("/task/create", taskController.createTask);
-
-// Update Task
 router.put("/task/:taskId", taskController.updateTask);
-
-// Get All Tasks by Garage
 router.get("/gettask", taskController.getTasksByGarage);
-
-// Delete Task
 router.delete("/task/:taskId", taskController.deleteTask);
-// User Management Routes (Role-based Access Control)
+
+// User Management Routes (Admin only)
 router.get("/getme", getMe);
-router.post("/create-user", createUser);
-router.put("/update-permissions/:id", updatePermissions);
-router.delete("/delete-user/:id", deleteUser);
-router.get("/users", getAllUsers);
+router.post("/create-user", adminAuth(), createUser);
+router.put("/update-permissions/:id", adminAuth(), updatePermissions);
+router.delete("/delete-user/:id", adminAuth(), deleteUser);
+router.get("/users", adminAuth(), getAllUsers);
 router.get("/getusersbygarage", getUserById);
-// Nested Routes (e.g., Payment)
+
 module.exports = router;

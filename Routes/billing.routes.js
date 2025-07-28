@@ -1,28 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const billingController = require("../Controllers/billing.controller");
-const auth = require("../Middlewares/auth");
-const checkPermission = require("../Middlewares/checkpermission");
-router.post(
-  "/generate/:jobCardId",
-  auth(),
-  // checkPermission("billing:generate"),
-  billingController.generateBill
-);
+const { auth } = require("../Middlewares/auth");
+
+// Generate bill
+router.post("/generate/:jobCardId", auth(), billingController.generateBill);
 
 // Process payment
-router.post(
-  "/pay",
-  auth(),
-  // checkPermission("billing:pay"),
-  billingController.processPayment
-);
+router.post("/pay", auth(), billingController.processPayment);
 
 // Get invoice
-router.get(
-  "/invoice",
-  auth(),
-  // checkPermission("billing:invoice"),
-  billingController.getInvoice
-);
+router.get("/invoice", auth(), billingController.getInvoice);
+
 module.exports = router;
