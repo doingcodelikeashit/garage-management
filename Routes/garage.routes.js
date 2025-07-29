@@ -55,6 +55,7 @@ const {
   qualityCheckByEngineer,
 } = require("../Controllers/jobCard.controller");
 const { auth, adminAuth } = require("../Middlewares/auth");
+const authGarage = require("../Middlewares/garageauth.middleware");
 
 // Public Route
 router.post("/login", garageLogin);
@@ -95,6 +96,7 @@ router.delete("/inventory/delete/:partId", deletePart);
 router.get("/jobcards/garage/:garageId", getJobCardsByGarage);
 router.post(
   "/jobcards/add",
+  authGarage,
   upload.fields([
     { name: "images", maxCount: 5 },
     { name: "video", maxCount: 1 },
@@ -112,17 +114,17 @@ router.post("/insurance/add", adminController.addInsurance);
 router.get("/insurance/expiring", adminController.getExpiringInsurance);
 
 // Task routes (using garage auth)
-router.post("/task/create", taskController.createTask);
+router.post("/task/create", authGarage, taskController.createTask);
 router.put("/task/:taskId", taskController.updateTask);
-router.get("/gettask", taskController.getTasksByGarage);
+router.get("/gettask", authGarage, taskController.getTasksByGarage);
 router.delete("/task/:taskId", taskController.deleteTask);
 
 // User Management Routes (Admin only)
-router.get("/getme", getMe);
+router.get("/getme", authGarage, getMe);
 router.post("/create-user", adminAuth(), createUser); // KEEP AUTH
 router.put("/update-permissions/:id", updatePermissions);
 router.delete("/delete-user/:id", deleteUser);
 router.get("/users", getAllUsers);
-router.get("/getusersbygarage", getUserById);
+router.get("/getusersbygarage", authGarage, getUserById);
 
 module.exports = router;

@@ -37,7 +37,11 @@ router.post(
   createJobCard
 );
 
-router.put("/updatebillstatus/:jobCardId", updateGenerateBillStatus);
+router.put(
+  "/updatebillstatus/:jobCardId",
+  authGarage,
+  updateGenerateBillStatus
+);
 
 router.put("/updatestatus/:jobCardId", updateJobStatus);
 
