@@ -13,7 +13,20 @@ const adminRoutes = require("./Routes/admin.routes");
 const verificationRoutes = require("./Routes/verify.routes");
 const planRoutes = require("./Routes/plan.routes");
 
-app.use(cors());
+// Configure CORS with explicit origins
+const corsOptions = {
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://garage-management-zi5z.onrender.com",
+    "https://qarage-management-zi5z.onrender.com", // Handle the typo in URL
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"],
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use("/api/garage", garageRoutes);
