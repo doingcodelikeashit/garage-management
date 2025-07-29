@@ -21,12 +21,12 @@ const checkPermission = require("../Middlewares/checkpermission");
 const router = express.Router();
 
 // Get all Job Cards for a Garage
-router.get("/garage/:garageId", authGarage, getJobCardsByGarage);
+router.get("/garage/:garageId", getJobCardsByGarage);
 
 // Get next job card number for a garage
-router.get("/next-number/:garageId", authGarage, getNextJobCardNumber);
+router.get("/next-number/:garageId", getNextJobCardNumber);
 
-// Create Job Card with images
+// Create Job Card with images (KEEP AUTH)
 router.post(
   "/add",
   authGarage,
@@ -37,40 +37,28 @@ router.post(
   createJobCard
 );
 
-router.put(
-  "/updatebillstatus/:jobCardId",
-  authGarage,
-  updateGenerateBillStatus
-);
+router.put("/updatebillstatus/:jobCardId", updateGenerateBillStatus);
 
-router.put("/updatestatus/:jobCardId", authGarage, updateJobStatus);
+router.put("/updatestatus/:jobCardId", updateJobStatus);
 
 // Get Single Job Card
-router.get("/:jobCardId", authGarage, getJobCardById);
+router.get("/:jobCardId", getJobCardById);
 
 // Update Job Card
-router.put("/:jobCardId", authGarage, updateJobCard);
+router.put("/:jobCardId", updateJobCard);
 
 // Delete Job Card
-router.delete("/:jobCardId", authGarage, deleteJobCard);
+router.delete("/:jobCardId", deleteJobCard);
 
 // Assign Engineer
-router.put("/assign-engineer/:jobCardId", authGarage, assignEngineer);
+router.put("/assign-engineer/:jobCardId", assignEngineer);
 
-router.put(
-  "/assign-jobcards/:engineerId",
-  authGarage,
-  assignJobCardsToEngineer
-);
+router.put("/assign-jobcards/:engineerId", assignJobCardsToEngineer);
 
 // Log Work Progress
-router.put("/jobcard/:jobCardId/workprogress", authGarage, logWorkProgress);
+router.put("/jobcard/:jobCardId/workprogress", logWorkProgress);
 
 // Quality Check
-router.put(
-  "/jobcard/:jobCardId/qualitycheck",
-  authGarage,
-  qualityCheckByEngineer
-);
+router.put("/jobcard/:jobCardId/qualitycheck", qualityCheckByEngineer);
 
 module.exports = router;

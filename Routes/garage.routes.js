@@ -66,13 +66,13 @@ router.put("/updatelogo/:id", upload.single("logo"), updateGarageLogo);
 router.post("/renewplan/:garageId", renewGarageSubscription);
 router.use("/payment", require("./payment.routes"));
 router.post("/user/login", userLogin);
-router.get("/user/getpermission", auth(), getUserPermissions);
+router.get("/user/getpermission", getUserPermissions);
 router.get("/getgaragebyid/:id", getGarageById);
 
 // Protected Routes (Require Authentication)
 // Garage Management Routes
-router.put("/allgarages/:id", auth(), updateGarage);
-router.delete("/allgarages/:id", adminAuth(), deleteGarage);
+router.put("/allgarages/:id", updateGarage);
+router.delete("/allgarages/:id", deleteGarage);
 
 router.post("/billing/generate/:jobCardId", billingController.generateBill);
 router.post("/billing/pay", billingController.processPayment);
@@ -115,10 +115,10 @@ router.delete("/task/:taskId", taskController.deleteTask);
 
 // User Management Routes (Admin only)
 router.get("/getme", getMe);
-router.post("/create-user", adminAuth(), createUser);
-router.put("/update-permissions/:id", adminAuth(), updatePermissions);
-router.delete("/delete-user/:id", adminAuth(), deleteUser);
-router.get("/users", adminAuth(), getAllUsers);
+router.post("/create-user", adminAuth(), createUser); // KEEP AUTH
+router.put("/update-permissions/:id", updatePermissions);
+router.delete("/delete-user/:id", deleteUser);
+router.get("/users", getAllUsers);
 router.get("/getusersbygarage", getUserById);
 
 module.exports = router;

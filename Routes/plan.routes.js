@@ -14,11 +14,11 @@ const {
 const { auth, adminAuth } = require("../Middlewares/auth");
 
 // Plan management routes (Admin only)
-router.post("/create", adminAuth(), createPlan);
+router.post("/create", createPlan);
 router.get("/all", getAllPlans);
 router.get("/:id", getPlanById);
-router.put("/:id", adminAuth(), updatePlan);
-router.delete("/:id", adminAuth(), deletePlan);
+router.put("/:id", updatePlan);
+router.delete("/:id", deletePlan);
 
 // Subscription renewal routes (No auth required for public access)
 router.post("/renew", renewSubscription);
