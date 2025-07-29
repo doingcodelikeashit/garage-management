@@ -194,7 +194,7 @@ exports.renewSubscription = async (req, res) => {
     const orderOptions = {
       amount: plan.amount * 100, // Convert to paise
       currency: "INR",
-      receipt: `renewal_${garageId}_${Date.now()}`,
+      receipt: `renew_${Date.now()}`, // Shortened receipt format
       payment_capture: 1,
       notes: {
         garageId: garageId,
