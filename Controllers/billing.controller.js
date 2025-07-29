@@ -98,7 +98,7 @@ exports.generateBill = async (req, res) => {
 exports.processPayment = async (req, res) => {
   try {
     const { jobId, paymentMethod } = req.body;
-    const bill = await Billing.findOneAndUpdate(
+    const bill = await Bill.findOneAndUpdate(
       { jobId },
       { isPaid: true, paymentMethod },
       { new: true }
@@ -129,7 +129,7 @@ exports.getInvoice = async (req, res) => {
         return res.status(403).json({ message: "Access denied" });
       }
     }
-    const bill = await Billing.findOne(filter);
+    const bill = await Bill.findOne(filter);
     if (!bill) return res.status(404).json({ message: "Invoice not found" });
     res.json(bill);
   } catch (err) {

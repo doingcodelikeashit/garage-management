@@ -15,15 +15,19 @@ const {
   getGarageById,
   updateGarage,
   deleteGarage,
+  getGarageIdByEmail,
+} = garageController;
+
+// Import user-related functions from superadmin controller
+const {
   createUser,
+  userLogin,
+  getUserPermissions,
   updatePermissions,
   deleteUser,
   getAllUsers,
   getUserById,
-  userLogin,
-  getUserPermissions,
-  getGarageIdByEmail,
-} = garageController;
+} = require("../Controllers/superadmin.controller");
 
 const billingController = require("../Controllers/billing.controller");
 const taskController = require("../Controllers/task.controller");
