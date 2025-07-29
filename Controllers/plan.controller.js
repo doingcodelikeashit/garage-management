@@ -112,6 +112,14 @@ exports.renewSubscription = async (req, res) => {
   try {
     const { garageId, planId, paymentMethod = "razorpay" } = req.body;
 
+    // Validate required fields
+    if (!garageId || !planId) {
+      return res.status(400).json({
+        success: false,
+        message: "garageId and planId are required",
+      });
+    }
+
     // Validate garageId
     if (!isValidObjectId(garageId)) {
       return res.status(400).json({
@@ -130,6 +138,16 @@ exports.renewSubscription = async (req, res) => {
       });
     }
 
+    // Check Razorpay configuration
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      console.error("Razorpay environment variables not configured");
+      return res.status(500).json({
+        success: false,
+        message: "Payment gateway configuration error",
+        error: "Razorpay credentials not configured",
+      });
+    }
+
     // Validate garage
     const garage = await Garage.findById(garageId);
     if (!garage) {
@@ -145,6 +163,15 @@ exports.renewSubscription = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Plan not found",
+      });
+    }
+
+    // Validate plan amount
+    if (!plan.amount || isNaN(plan.amount) || plan.amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid plan amount",
+        error: "Plan amount must be a positive number",
       });
     }
 
@@ -177,7 +204,11 @@ exports.renewSubscription = async (req, res) => {
       },
     };
 
+    console.log("Creating Razorpay order with options:", orderOptions);
+
     const order = await razorpay.orders.create(orderOptions);
+
+    console.log("Razorpay order created successfully:", order.id);
 
     res.status(200).json({
       success: true,
@@ -203,9 +234,20 @@ exports.renewSubscription = async (req, res) => {
     });
   } catch (error) {
     console.error("Renew subscription error:", error);
+
+    // Provide more specific error messages
+    let errorMessage = "Failed to create renewal order";
+    if (error.message.includes("key_id")) {
+      errorMessage = "Payment gateway configuration error";
+    } else if (error.message.includes("amount")) {
+      errorMessage = "Invalid plan amount";
+    } else if (error.message.includes("currency")) {
+      errorMessage = "Invalid currency configuration";
+    }
+
     res.status(500).json({
       success: false,
-      message: "Failed to create renewal order",
+      message: errorMessage,
       error: error.message,
     });
   }
