@@ -22,6 +22,7 @@ const {
   getUserById,
   userLogin,
   getUserPermissions,
+  getGarageIdByEmail,
 } = garageController;
 
 const billingController = require("../Controllers/billing.controller");
@@ -68,6 +69,9 @@ router.use("/payment", require("./payment.routes"));
 router.post("/user/login", userLogin);
 router.get("/user/getpermission", getUserPermissions);
 router.get("/getgaragebyid/:id", getGarageById);
+
+// Get Garage ID by Email
+router.get("/get-garage-id/:email", getGarageIdByEmail);
 
 // Protected Routes (Require Authentication)
 // Garage Management Routes

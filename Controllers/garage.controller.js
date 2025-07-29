@@ -447,6 +447,43 @@ const deleteGarage = async (req, res) => {
   }
 };
 
+// Get Garage ID by Email
+const getGarageIdByEmail = async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    if (!email) {
+      return res.status(400).json({
+        message: "Email parameter is required",
+      });
+    }
+
+    // Find garage by email
+    const garage = await Garage.findOne({ email }).select("_id name email");
+
+    if (!garage) {
+      return res.status(404).json({
+        message: "Garage not found with this email address",
+      });
+    }
+
+    res.status(200).json({
+      message: "Garage found successfully",
+      data: {
+        garageId: garage._id,
+        name: garage.name,
+        email: garage.email,
+      },
+    });
+  } catch (error) {
+    console.error("getGarageIdByEmail error:", error);
+    res.status(500).json({
+      message: "Failed to get garage ID",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   createGarage,
   updateGarageLogo,
@@ -461,4 +498,5 @@ module.exports = {
   submitRegistration,
   verifyRegistrationOTP,
   sendRegistrationOTP,
+  getGarageIdByEmail,
 };
