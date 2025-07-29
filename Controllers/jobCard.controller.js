@@ -106,7 +106,16 @@ const createJobCard = async (req, res) => {
       .sort({ jobCardNumber: -1 })
       .select("jobCardNumber");
 
-    const jobCardNumber = lastJobCard ? lastJobCard.jobCardNumber + 1 : 1;
+    // Ensure jobCardNumber is always a valid number
+    let jobCardNumber = 1; // Default to 1 if no previous job cards exist
+
+    if (
+      lastJobCard &&
+      lastJobCard.jobCardNumber &&
+      !isNaN(lastJobCard.jobCardNumber)
+    ) {
+      jobCardNumber = lastJobCard.jobCardNumber + 1;
+    }
 
     // Generate jobId (e.g., JC-<timestamp>)
     const jobId = `JC-${Date.now()}`;
@@ -608,7 +617,16 @@ const getNextJobCardNumber = async (req, res) => {
       .sort({ jobCardNumber: -1 })
       .select("jobCardNumber");
 
-    const nextJobCardNumber = lastJobCard ? lastJobCard.jobCardNumber + 1 : 1;
+    // Ensure nextJobCardNumber is always a valid number
+    let nextJobCardNumber = 1; // Default to 1 if no previous job cards exist
+
+    if (
+      lastJobCard &&
+      lastJobCard.jobCardNumber &&
+      !isNaN(lastJobCard.jobCardNumber)
+    ) {
+      nextJobCardNumber = lastJobCard.jobCardNumber + 1;
+    }
 
     res.status(200).json({
       garageId,
