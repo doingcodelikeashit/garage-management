@@ -26,7 +26,8 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"],
 };
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 
 app.use("/api/garage", garageRoutes);
