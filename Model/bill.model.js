@@ -6,6 +6,10 @@ const BillSchema = new mongoose.Schema(
       ref: "JobCard",
       required: true,
     },
+    jobId: {
+      type: String,
+      required: true,
+    },
     garageId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Garage",

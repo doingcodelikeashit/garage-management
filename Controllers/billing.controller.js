@@ -66,6 +66,7 @@ exports.generateBill = async (req, res) => {
 
     const newBill = new Bill({
       jobCardId,
+      jobId: jobCard.jobId, // Add jobId from job card
       garageId: jobCard.garageId,
       invoiceNo,
       parts,
