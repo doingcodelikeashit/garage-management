@@ -75,5 +75,8 @@ const JobCardSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Add compound unique index to prevent duplicate job card numbers within the same garage
+JobCardSchema.index({ garageId: 1, jobCardNumber: 1 }, { unique: true });
+
 const JobCard = mongoose.model("JobCard", JobCardSchema);
 module.exports = JobCard;

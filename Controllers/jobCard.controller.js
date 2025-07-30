@@ -8,6 +8,37 @@ const isValidObjectId = (id) => {
   return mongoose.Types.ObjectId.isValid(id);
 };
 
+// Helper function to get next job card number atomically
+const generateNextJobCardNumber = async (garageId) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // Find the last job card for this garage
+    const lastJobCard = await JobCard.findOne({ garageId })
+      .sort({ jobCardNumber: -1 })
+      .select("jobCardNumber")
+      .session(session);
+
+    let nextNumber = 1;
+    if (
+      lastJobCard &&
+      lastJobCard.jobCardNumber &&
+      !isNaN(lastJobCard.jobCardNumber)
+    ) {
+      nextNumber = lastJobCard.jobCardNumber + 1;
+    }
+
+    await session.commitTransaction();
+    return nextNumber;
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
+  }
+};
+
 // ➤ Create a Job Card (Engineer not assigned initially)
 // const createJobCard = async (req, res) => {
 //   try {
@@ -101,21 +132,8 @@ const createJobCard = async (req, res) => {
       return res.status(404).json({ message: "Garage not found" });
     }
 
-    // Generate sequential job card number for this garage
-    const lastJobCard = await JobCard.findOne({ garageId })
-      .sort({ jobCardNumber: -1 })
-      .select("jobCardNumber");
-
-    // Ensure jobCardNumber is always a valid number
-    let jobCardNumber = 1; // Default to 1 if no previous job cards exist
-
-    if (
-      lastJobCard &&
-      lastJobCard.jobCardNumber &&
-      !isNaN(lastJobCard.jobCardNumber)
-    ) {
-      jobCardNumber = lastJobCard.jobCardNumber + 1;
-    }
+    // Generate sequential job card number for this garage atomically
+    const jobCardNumber = await generateNextJobCardNumber(garageId);
 
     // Generate jobId (e.g., JC-<timestamp>)
     const jobId = `JC-${Date.now()}`;
@@ -128,6 +146,11 @@ const createJobCard = async (req, res) => {
     if (req.user && req.user._id) {
       createdBy = req.user._id;
       createdByModel = "User";
+    }
+
+    // Validate that jobCardNumber is a valid number
+    if (!jobCardNumber || isNaN(jobCardNumber) || jobCardNumber < 1) {
+      throw new Error("Invalid job card number generated");
     }
 
     const newJobCard = new JobCard({
@@ -172,6 +195,36 @@ const createJobCard = async (req, res) => {
     });
   } catch (error) {
     console.error("createJobCard error:", error);
+
+    // Handle specific validation errors
+    if (error.name === "ValidationError") {
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
+      return res.status(400).json({
+        message: "Validation Error",
+        errors: validationErrors,
+      });
+    }
+
+    // Handle job card number generation errors
+    if (error.message === "Invalid job card number generated") {
+      return res.status(500).json({
+        message: "Failed to generate job card number. Please try again.",
+      });
+    }
+
+    // Handle duplicate job card number errors
+    if (
+      error.code === 11000 &&
+      error.keyPattern &&
+      error.keyPattern.jobCardNumber
+    ) {
+      return res.status(409).json({
+        message: "Job card number already exists. Please try again.",
+      });
+    }
+
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
