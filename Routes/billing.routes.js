@@ -15,4 +15,7 @@ router.get("/invoice", billingController.getInvoice);
 // Get last invoice number for garage
 router.get("/last-invoice/:garageId", billingController.getLastInvoiceNumber);
 
+// Get financial report for garage
+router.get("/financial-report/:garageId", billingController.getFinancialReport);
+
 module.exports = router;

@@ -156,3 +156,146 @@ exports.getLastInvoiceNumber = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Get financial report for garage
+exports.getFinancialReport = async (req, res) => {
+  try {
+    const { garageId } = req.params;
+    const { startDate, endDate } = req.query;
+
+    // Build date filter
+    let dateFilter = {};
+    if (startDate && endDate) {
+      dateFilter = {
+        createdAt: {
+          $gte: new Date(startDate),
+          $lte: new Date(endDate + "T23:59:59.999Z"),
+        },
+      };
+    }
+
+    // Get all bills for the garage
+    const bills = await Bill.find({
+      garageId,
+      ...dateFilter,
+    }).populate("jobCardId", "customerName carNumber model status");
+
+    // Calculate financial summary
+    let totalRevenue = 0;
+    let totalPartsCost = 0;
+    let totalLaborCost = 0;
+    let totalGST = 0;
+    let totalDiscount = 0;
+    let completedJobs = 0;
+    let pendingJobs = 0;
+
+    const monthlyData = {};
+    const billTypeBreakdown = { gst: 0, "non-gst": 0 };
+
+    bills.forEach((bill) => {
+      totalRevenue += bill.finalAmount || 0;
+      totalPartsCost += bill.totalPartsCost || 0;
+      totalLaborCost += bill.totalLaborCost || 0;
+      totalGST += bill.gst || 0;
+      totalDiscount += bill.discount || 0;
+
+      // Count by bill type
+      if (bill.billType === "gst") {
+        billTypeBreakdown.gst += bill.finalAmount || 0;
+      } else {
+        billTypeBreakdown["non-gst"] += bill.finalAmount || 0;
+      }
+
+      // Monthly breakdown
+      const month = new Date(bill.createdAt).toISOString().slice(0, 7); // YYYY-MM
+      if (!monthlyData[month]) {
+        monthlyData[month] = {
+          revenue: 0,
+          jobs: 0,
+          partsCost: 0,
+          laborCost: 0,
+        };
+      }
+      monthlyData[month].revenue += bill.finalAmount || 0;
+      monthlyData[month].jobs += 1;
+      monthlyData[month].partsCost += bill.totalPartsCost || 0;
+      monthlyData[month].laborCost += bill.totalLaborCost || 0;
+
+      // Job status count
+      if (bill.jobCardId && bill.jobCardId.status === "Completed") {
+        completedJobs += 1;
+      } else {
+        pendingJobs += 1;
+      }
+    });
+
+    // Calculate profit
+    const totalCost = totalPartsCost + totalLaborCost;
+    const grossProfit = totalRevenue - totalCost;
+    const netProfit = grossProfit - totalDiscount;
+
+    // Get current month data
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const currentMonthData = monthlyData[currentMonth] || {
+      revenue: 0,
+      jobs: 0,
+      partsCost: 0,
+      laborCost: 0,
+    };
+
+    const report = {
+      garageId,
+      generatedAt: new Date(),
+      period: {
+        startDate: startDate || null,
+        endDate: endDate || null,
+      },
+      summary: {
+        totalBills: bills.length,
+        totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+        totalPartsCost: parseFloat(totalPartsCost.toFixed(2)),
+        totalLaborCost: parseFloat(totalLaborCost.toFixed(2)),
+        totalGST: parseFloat(totalGST.toFixed(2)),
+        totalDiscount: parseFloat(totalDiscount.toFixed(2)),
+        grossProfit: parseFloat(grossProfit.toFixed(2)),
+        netProfit: parseFloat(netProfit.toFixed(2)),
+        completedJobs,
+        pendingJobs,
+      },
+      currentMonth: {
+        revenue: parseFloat(currentMonthData.revenue.toFixed(2)),
+        jobs: currentMonthData.jobs,
+        partsCost: parseFloat(currentMonthData.partsCost.toFixed(2)),
+        laborCost: parseFloat(currentMonthData.laborCost.toFixed(2)),
+      },
+      billTypeBreakdown,
+      monthlyBreakdown: Object.keys(monthlyData).map((month) => ({
+        month,
+        ...monthlyData[month],
+        revenue: parseFloat(monthlyData[month].revenue.toFixed(2)),
+        partsCost: parseFloat(monthlyData[month].partsCost.toFixed(2)),
+        laborCost: parseFloat(monthlyData[month].laborCost.toFixed(2)),
+      })),
+      recentBills: bills.slice(0, 10).map((bill) => ({
+        invoiceNo: bill.invoiceNo,
+        jobId: bill.jobId,
+        customerName: bill.jobCardId?.customerName || "N/A",
+        carNumber: bill.jobCardId?.carNumber || "N/A",
+        amount: bill.finalAmount,
+        createdAt: bill.createdAt,
+        billType: bill.billType,
+      })),
+    };
+
+    res.status(200).json({
+      message: "Financial report generated successfully",
+      report,
+    });
+  } catch (error) {
+    console.error("getFinancialReport error:", error);
+    res.status(500).json({
+      message: "Failed to generate financial report",
+      error: error.message,
+    });
+  }
+};
