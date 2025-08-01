@@ -276,6 +276,7 @@ const updateGenerateBillStatus = async (req, res) => {
 const getJobCardsByGarage = async (req, res) => {
   try {
     const { garageId } = req.params;
+    const { createdBy } = req.query; // Get user filter from query params
 
     // Validate garageId
     if (!isValidObjectId(garageId)) {
@@ -290,8 +291,13 @@ const getJobCardsByGarage = async (req, res) => {
       return res.status(404).json({ message: "Garage not found" });
     }
 
-    // Get all job cards for this garage
+    // Build filter based on user type
     const filter = { garageId };
+
+    // If createdBy is provided, filter by user who created the job card
+    if (createdBy && isValidObjectId(createdBy)) {
+      filter.createdBy = createdBy;
+    }
 
     const jobCards = await JobCard.find(filter)
       .populate("engineerId", "name")
