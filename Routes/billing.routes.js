@@ -12,4 +12,7 @@ router.post("/pay", billingController.processPayment);
 // Get invoice
 router.get("/invoice", billingController.getInvoice);
 
+// Get last invoice number for garage
+router.get("/last-invoice/:garageId", billingController.getLastInvoiceNumber);
+
 module.exports = router;

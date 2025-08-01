@@ -137,3 +137,22 @@ exports.getInvoice = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Get last invoice number for garage
+exports.getLastInvoiceNumber = async (req, res) => {
+  try {
+    const { garageId } = req.params;
+
+    // Find the last bill for this garage
+    const lastBill = await Bill.findOne({ garageId }).sort({ createdAt: -1 });
+
+    let lastInvoiceNo = "INV000";
+    if (lastBill && lastBill.invoiceNo) {
+      lastInvoiceNo = `INV${lastBill.invoiceNo}`;
+    }
+
+    res.json({ lastInvoiceNo });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
