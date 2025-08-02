@@ -125,7 +125,7 @@ router.delete("/task/:taskId", taskController.deleteTask);
 
 // User Management Routes (Admin only)
 router.get("/getme", authGarage, getMe);
-router.post("/create-user", adminAuth(), createUser); // KEEP AUTH
+router.post("/create-user", authGarage, createUser); // KEEP AUTH
 router.put("/update-permissions/:id", updatePermissions);
 router.delete("/delete-user/:id", deleteUser);
 router.get("/users", getAllUsers);
