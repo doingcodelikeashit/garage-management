@@ -58,6 +58,8 @@ const JobCardSchema = new mongoose.Schema(
       },
     ],
     laborHours: Number,
+    laborServicesTotal: { type: Number, default: 0 }, // Labor & Services Total
+    laborServicesTax: { type: Number, default: 0 }, // Labor & Services Tax
     engineerRemarks: String,
     qualityCheck: {
       notes: String,

@@ -308,9 +308,22 @@ curl -X PUT http://localhost:8000/api/garage/jobcards/jobcard_id_here \
   }'
 ```
 
+### 11. Update Job Card with Labor & Services
+
+```bash
+curl -X PUT http://localhost:8000/api/garage/jobcards/jobcard_id_here \
+  -H "Content-Type: application/json" \
+  -d '{
+    "laborServicesTotal": 100,
+    "laborServicesTax": 10
+  }'
+```
+
 #### Job Card Fields Description
 
 - **excessAmount** (Number): The excess amount for insurance claims. This is the amount that the customer needs to pay before the insurance covers the rest. Default value is 0.
+- **laborServicesTotal** (Number): Total amount for labor and services. Default value is 0.
+- **laborServicesTax** (Number): Tax amount for labor and services. Default value is 0.
 - **type** (String): Type of job (e.g., "Regular Service", "Insurance Claim", "Repair")
 - **customerNumber** (String): Unique customer identifier
 - **customerName** (String): Name of the customer
@@ -907,6 +920,8 @@ curl -X POST http://localhost:8000/api/garage/jobcards/add \
   -F "fuelType=Petrol" \
   -F "type=Insurance Claim" \
   -F "excessAmount=5000" \
+  -F "laborServicesTotal=100" \
+  -F "laborServicesTax=10" \
   -F "jobDetails=Insurance claim processing with excess amount"
 ```
 

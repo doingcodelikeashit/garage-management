@@ -101,6 +101,8 @@ const createJobCard = async (req, res) => {
       registrationNumber,
       type, // jobType
       excessAmount, // Excess amount for insurance claims
+      laborServicesTotal, // Labor & Services Total
+      laborServicesTax, // Labor & Services Tax
       jobDetails, // price removed from here
     } = req.body;
 
@@ -171,6 +173,8 @@ const createJobCard = async (req, res) => {
       registrationNumber,
       type, // jobType
       excessAmount, // Excess amount for insurance claims
+      laborServicesTotal, // Labor & Services Total
+      laborServicesTax, // Labor & Services Tax
       jobDetails, // price removed
       images, // These are Cloudinary URLs
       video, // Also Cloudinary URL
@@ -378,6 +382,8 @@ const updateJobCard = async (req, res) => {
       "registrationNumber",
       "type",
       "excessAmount",
+      "laborServicesTotal",
+      "laborServicesTax",
       "jobDetails",
       "images",
       "video",
