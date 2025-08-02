@@ -25,7 +25,7 @@ const JobCardSchema = new mongoose.Schema(
     expiryDate: { type: Date },
     registrationNumber: { type: String },
     type: { type: String }, // jobType
-    // excessAmount removed as required
+    excessAmount: { type: Number, default: 0 }, // Excess amount for insurance claims
     jobDetails: { type: String }, // price removed from here
     status: {
       type: String,

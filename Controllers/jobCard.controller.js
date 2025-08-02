@@ -100,8 +100,8 @@ const createJobCard = async (req, res) => {
       expiryDate,
       registrationNumber,
       type, // jobType
+      excessAmount, // Excess amount for insurance claims
       jobDetails, // price removed from here
-      // excessAmount removed as required
     } = req.body;
 
     const images = req.files?.images?.map((file) => file.path) || [];
@@ -170,6 +170,7 @@ const createJobCard = async (req, res) => {
       expiryDate,
       registrationNumber,
       type, // jobType
+      excessAmount, // Excess amount for insurance claims
       jobDetails, // price removed
       images, // These are Cloudinary URLs
       video, // Also Cloudinary URL
@@ -376,6 +377,7 @@ const updateJobCard = async (req, res) => {
       "expiryDate",
       "registrationNumber",
       "type",
+      "excessAmount",
       "jobDetails",
       "images",
       "video",

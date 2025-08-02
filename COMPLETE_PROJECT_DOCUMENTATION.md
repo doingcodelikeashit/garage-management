@@ -214,6 +214,7 @@ curl -X POST http://localhost:8000/api/garage/jobcards/add \
   -F "policyNumber=POL123456" \
   -F "expiryDate=2025-12-31" \
   -F "type=Regular Service" \
+  -F "excessAmount=5000" \
   -F "jobDetails=Oil change and filter replacement" \
   -F "images=@/path/to/image1.jpg" \
   -F "images=@/path/to/image2.jpg" \
@@ -295,6 +296,43 @@ curl -X PUT http://localhost:8000/api/garage/jobcards/jobcard_id_here/qualityche
 ```bash
 curl -X GET http://localhost:8000/api/jobcards/next-number/garage_id_here
 ```
+
+### 10. Update Job Card with Excess Amount
+
+```bash
+curl -X PUT http://localhost:8000/api/garage/jobcards/jobcard_id_here \
+  -H "Content-Type: application/json" \
+  -d '{
+    "excessAmount": 5000,
+    "type": "Insurance Claim with Excess"
+  }'
+```
+
+#### Job Card Fields Description
+
+- **excessAmount** (Number): The excess amount for insurance claims. This is the amount that the customer needs to pay before the insurance covers the rest. Default value is 0.
+- **type** (String): Type of job (e.g., "Regular Service", "Insurance Claim", "Repair")
+- **customerNumber** (String): Unique customer identifier
+- **customerName** (String): Name of the customer
+- **contactNumber** (String): Customer's contact number
+- **email** (String): Customer's email address
+- **company** (String): Customer's company name
+- **carNumber** (String): Vehicle registration number
+- **model** (String): Vehicle model
+- **kilometer** (Number): Current kilometer reading
+- **fuelType** (String): Type of fuel (Petrol, Diesel, Electric, etc.)
+- **fuelLevel** (String): Current fuel level
+- **insuranceProvider** (String): Insurance company name
+- **policyNumber** (String): Insurance policy number
+- **expiryDate** (Date): Insurance expiry date
+- **registrationNumber** (String): Vehicle registration number
+- **jobDetails** (String): Detailed description of the job
+- **status** (String): Job status (In Progress, Completed, Pending, Cancelled)
+- **images** (Array): Array of image URLs
+- **video** (String): Video URL
+- **partsUsed** (Array): Array of parts used in the job
+- **laborHours** (Number): Hours of labor spent
+- **engineerRemarks** (String): Comments from the engineer
 
 ---
 
@@ -867,8 +905,9 @@ curl -X POST http://localhost:8000/api/garage/jobcards/add \
   -F "model=Toyota Camry" \
   -F "kilometer=50000" \
   -F "fuelType=Petrol" \
-  -F "type=Regular Service" \
-  -F "jobDetails=Oil change and filter replacement"
+  -F "type=Insurance Claim" \
+  -F "excessAmount=5000" \
+  -F "jobDetails=Insurance claim processing with excess amount"
 ```
 
 #### Step 2: Assign Engineer
