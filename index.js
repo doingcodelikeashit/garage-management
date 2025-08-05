@@ -13,21 +13,57 @@ const adminRoutes = require("./Routes/admin.routes");
 const verificationRoutes = require("./Routes/verify.routes");
 const planRoutes = require("./Routes/plan.routes");
 
-// Configure CORS with explicit origins
+// Configure CORS with strict-origin-when-cross-origin policy
 const corsOptions = {
-  origin: [
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "https://garage-management-zi5z.onrender.com",
-    "https://qarage-management-zi5z.onrender.com", // Handle the typo in URL
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "https://garage-management-zi5z.onrender.com",
+      "https://qarage-management-zi5z.onrender.com", // Handle the typo in URL
+      "https://car-my-app-git-master-ishaladanis-projects.vercel.app",
+    ];
+
+    // Check if origin is in allowed list
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      // For strict-origin-when-cross-origin: only allow HTTPS origins
+      if (origin.startsWith("https://")) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "x-auth-token"],
+  optionsSuccessStatus: 200,
+  // Additional security headers
+  preflightContinue: false,
+  maxAge: 86400, // Cache preflight for 24 hours
 };
 
-// app.use(cors(corsOptions));
-app.use(cors());
+// Use strict CORS policy
+app.use(cors(corsOptions));
+
+// Add security headers for strict-origin-when-cross-origin
+app.use((req, res, next) => {
+  // Set Referrer Policy to strict-origin-when-cross-origin
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+
+  // Additional security headers
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+
+  next();
+});
+
 app.use(express.json());
 
 app.use("/api/garage", garageRoutes);
