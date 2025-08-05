@@ -114,11 +114,11 @@ const createJobCard = async (req, res) => {
       return res.status(400).json({ message: "Invalid garage ID format" });
     }
 
-    // Check if req.garage exists (from garage authentication)
+    // Check if req.garage exists (from hybrid authentication)
     if (!req.garage || !req.garage._id) {
       return res.status(401).json({
         message:
-          "Authentication required. Please provide a valid garage JWT token.",
+          "Authentication required. Please provide a valid user or garage JWT token.",
       });
     }
 

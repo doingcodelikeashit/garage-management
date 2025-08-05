@@ -60,6 +60,7 @@ const {
 } = require("../Controllers/jobCard.controller");
 const { auth, adminAuth } = require("../Middlewares/auth");
 const authGarage = require("../Middlewares/garageauth.middleware");
+const hybridAuth = require("../Middlewares/hybridAuth");
 
 // Public Route
 router.post("/login", garageLogin);
@@ -100,7 +101,7 @@ router.delete("/inventory/delete/:partId", deletePart);
 router.get("/jobcards/garage/:garageId", getJobCardsByGarage);
 router.post(
   "/jobcards/add",
-  authGarage,
+  hybridAuth,
   upload.fields([
     { name: "images", maxCount: 5 },
     { name: "video", maxCount: 1 },
@@ -117,10 +118,10 @@ router.put("/jobcards/:jobCardId/qualitycheck", qualityCheckByEngineer);
 router.post("/insurance/add", adminController.addInsurance);
 router.get("/insurance/expiring", adminController.getExpiringInsurance);
 
-// Task routes (using garage auth)
-router.post("/task/create", authGarage, taskController.createTask);
+// Task routes (using hybrid auth for user/garage access)
+router.post("/task/create", hybridAuth, taskController.createTask);
 router.put("/task/:taskId", taskController.updateTask);
-router.get("/gettask", authGarage, taskController.getTasksByGarage);
+router.get("/gettask", hybridAuth, taskController.getTasksByGarage);
 router.delete("/task/:taskId", taskController.deleteTask);
 
 // User Management Routes (Admin only)
