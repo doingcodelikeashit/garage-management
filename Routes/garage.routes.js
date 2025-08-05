@@ -72,7 +72,7 @@ router.put("/updatelogo/:id", upload.single("logo"), updateGarageLogo);
 router.post("/renewplan/:garageId", renewGarageSubscription);
 router.use("/payment", require("./payment.routes"));
 router.post("/user/login", userLogin);
-router.get("/user/getpermission",auth, getUserPermissions);
+router.get("/user/getpermission", auth(), getUserPermissions);
 router.get("/getgaragebyid/:id", getGarageById);
 
 // Get Garage ID by Email

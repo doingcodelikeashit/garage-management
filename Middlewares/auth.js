@@ -29,6 +29,7 @@ const auth = () => {
         }
       }
 
+      // If neither user nor garage found, return error
       return res.status(401).json({ message: "User or garage not found" });
     } catch (err) {
       return res.status(401).json({ message: "Invalid token" });
