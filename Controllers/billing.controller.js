@@ -19,11 +19,11 @@ exports.generateBill = async (req, res) => {
       return res.status(404).json({ message: "Job Card not found" });
 
     // ✅ Ensure quality check approval before billing
-    if (!jobCard.qualityCheck || !jobCard.qualityCheck.billApproved) {
-      return res.status(403).json({
-        message: "Quality check not approved. Bill cannot be generated.",
-      });
-    }
+    // if (!jobCard.qualityCheck || !jobCard.qualityCheck.billApproved) {
+    //   return res.status(403).json({
+    //     message: "Quality check not approved. Bill cannot be generated.",
+    //   });
+    // }
 
     // Get garage for logo and bank details
     const garage = await require("../Model/garage.model").findById(
