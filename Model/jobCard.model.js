@@ -55,6 +55,8 @@ const JobCardSchema = new mongoose.Schema(
         quantity: Number,
         pricePerPiece: Number,
         totalPrice: Number,
+        taxAmount: Number,
+        hsnCode: String,
       },
     ],
     laborHours: Number,
