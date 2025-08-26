@@ -12,6 +12,7 @@ const {
   updateJobStatus,
   updateGenerateBillStatus,
   getNextJobCardNumber,
+  addPartsToJobCard,
 } = require("../Controllers/jobCard.controller");
 
 const upload = require("../Middlewares/upload");
@@ -64,5 +65,8 @@ router.put("/jobcard/:jobCardId/workprogress", logWorkProgress);
 
 // Quality Check
 router.put("/jobcard/:jobCardId/qualitycheck", qualityCheckByEngineer);
+
+// Add Parts to Job Card
+router.put("/jobcard/:jobCardId/parts", addPartsToJobCard);
 
 module.exports = router;

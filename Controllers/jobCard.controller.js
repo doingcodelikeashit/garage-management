@@ -39,6 +39,36 @@ const generateNextJobCardNumber = async (garageId) => {
   }
 };
 
+// Helper function to validate and process parts with tax and HSN information
+const validateAndProcessParts = (parts) => {
+  if (!Array.isArray(parts)) {
+    throw new Error("Parts must be an array");
+  }
+
+  return parts.map(part => {
+    // Validate required fields
+    if (!part.partName || !part.quantity || !part.pricePerPiece) {
+      throw new Error("Part must have partName, quantity, and pricePerPiece");
+    }
+
+    // Calculate total price if not provided
+    const totalPrice = part.totalPrice || (part.quantity * part.pricePerPiece);
+    
+    // Ensure taxAmount and hsnNumber are properly set
+    const taxAmount = part.taxAmount || 0;
+    const hsnNumber = part.hsnNumber || "";
+
+    return {
+      partName: part.partName,
+      quantity: Number(part.quantity),
+      pricePerPiece: Number(part.pricePerPiece),
+      totalPrice: Number(totalPrice),
+      taxAmount: Number(taxAmount),
+      hsnNumber: String(hsnNumber),
+    };
+  });
+};
+
 // ➤ Create a Job Card (Engineer not assigned initially)
 // const createJobCard = async (req, res) => {
 //   try {
@@ -600,7 +630,13 @@ const logWorkProgress = async (req, res) => {
     if (!jobCard)
       return res.status(404).json({ message: "Job Card not found" });
 
-    if (partsUsed) jobCard.partsUsed = partsUsed;
+    if (partsUsed) {
+      try {
+        jobCard.partsUsed = validateAndProcessParts(partsUsed);
+      } catch (err) {
+        return res.status(400).json({ message: "Invalid parts data", error: err.message });
+      }
+    }
     if (laborHours) jobCard.laborHours = laborHours;
     if (engineerRemarks) jobCard.engineerRemarks = engineerRemarks;
     if (
@@ -656,6 +692,55 @@ const qualityCheckByEngineer = async (req, res) => {
 
     await jobCard.save();
     res.status(200).json({ message: "Quality check completed", jobCard });
+  } catch (err) {
+    res.status(500).json({ message: "Server Error", error: err.message });
+  }
+};
+
+// ➤ Add Parts to Job Card
+const addPartsToJobCard = async (req, res) => {
+  try {
+    const { jobCardId } = req.params;
+    const { parts } = req.body;
+
+    // Validate jobCardId
+    if (!isValidObjectId(jobCardId)) {
+      return res.status(400).json({
+        message: "Invalid job card ID format. Please provide a valid 24-character ObjectId.",
+      });
+    }
+
+    // Find job card
+    const jobCard = await JobCard.findById(jobCardId);
+    if (!jobCard) {
+      return res.status(404).json({ message: "Job Card not found" });
+    }
+
+    if (!parts || !Array.isArray(parts)) {
+      return res.status(400).json({ message: "Parts must be an array" });
+    }
+
+    try {
+      const validatedParts = validateAndProcessParts(parts);
+      
+      // Add new parts to existing parts
+      if (jobCard.partsUsed) {
+        jobCard.partsUsed.push(...validatedParts);
+      } else {
+        jobCard.partsUsed = validatedParts;
+      }
+
+      await jobCard.save();
+      
+      res.status(200).json({ 
+        message: "Parts added successfully", 
+        jobCard,
+        addedParts: validatedParts 
+      });
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid parts data", error: err.message });
+    }
+
   } catch (err) {
     res.status(500).json({ message: "Server Error", error: err.message });
   }
@@ -718,5 +803,6 @@ module.exports = {
   updateJobStatus,
   logWorkProgress,
   qualityCheckByEngineer,
+  addPartsToJobCard, // Add the new function
   getNextJobCardNumber, // Add the new function
 };
