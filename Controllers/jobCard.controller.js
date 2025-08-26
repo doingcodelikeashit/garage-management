@@ -54,9 +54,17 @@ const validateAndProcessParts = (parts) => {
     // Calculate total price if not provided
     const totalPrice = part.totalPrice || (part.quantity * part.pricePerPiece);
     
-    // Ensure taxAmount and hsnNumber are properly set
-    const taxAmount = part.taxAmount || 0;
-    const hsnNumber = part.hsnNumber || "";
+    // Handle different tax field names (taxAmount, taxPercentage)
+    let taxAmount = 0;
+    if (part.taxAmount !== undefined) {
+      taxAmount = part.taxAmount;
+    } else if (part.taxPercentage !== undefined) {
+      // Convert percentage to amount if needed
+      taxAmount = (totalPrice * part.taxPercentage) / 100;
+    }
+    
+    // Handle HSN number
+    const hsnNumber = part.hsnNumber || part.hsnCode || "";
 
     return {
       partName: part.partName,
@@ -65,6 +73,11 @@ const validateAndProcessParts = (parts) => {
       totalPrice: Number(totalPrice),
       taxAmount: Number(taxAmount),
       hsnNumber: String(hsnNumber),
+      // Additional fields
+      taxPercentage: Number(part.taxPercentage || 0),
+      igst: Number(part.igst || 0),
+      cgstSgst: Number(part.cgstSgst || 0),
+      partNumber: String(part.partNumber || ""),
     };
   });
 };

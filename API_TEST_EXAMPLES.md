@@ -41,7 +41,7 @@ curl -X POST http://localhost:8000/api/jobcards/add \
   }'
 ```
 
-### 2. Update Work Progress with Parts
+### 2. Update Work Progress with Parts (Postman Structure)
 
 ```bash
 curl -X PUT http://localhost:8000/api/jobcards/jobcard/JOB_CARD_ID/workprogress \
@@ -49,20 +49,26 @@ curl -X PUT http://localhost:8000/api/jobcards/jobcard/JOB_CARD_ID/workprogress 
   -d '{
     "partsUsed": [
       {
-        "partName": "Brake Pads",
+        "partName": "check",
+        "partNumber": "30",
+        "hsnNumber": "SHE2733",
         "quantity": 1,
-        "pricePerPiece": 300,
-        "totalPrice": 300,
-        "taxAmount": 54,
-        "hsnNumber": "8708.30.00"
+        "pricePerPiece": 100,
+        "totalPrice": 100,
+        "taxPercentage": 0,
+        "igst": 0,
+        "cgstSgst": 0
       },
       {
-        "partName": "Air Filter",
-        "quantity": 1,
-        "pricePerPiece": 150,
-        "totalPrice": 150,
-        "taxAmount": 27,
-        "hsnNumber": "8421.31.00"
+        "partName": "Engine Oil",
+        "partNumber": "EO001",
+        "hsnNumber": "2710.19.00",
+        "quantity": 2,
+        "pricePerPiece": 50,
+        "totalPrice": 100,
+        "taxPercentage": 18,
+        "igst": 18,
+        "cgstSgst": 0
       }
     ],
     "laborHours": 3,

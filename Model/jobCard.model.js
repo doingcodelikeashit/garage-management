@@ -57,6 +57,11 @@ const JobCardSchema = new mongoose.Schema(
         totalPrice: Number,
         taxAmount: Number,
         hsnNumber: String,
+        // Additional tax fields for flexibility
+        taxPercentage: Number,
+        igst: Number,
+        cgstSgst: Number,
+        partNumber: String,
       },
     ],
     laborHours: Number,
