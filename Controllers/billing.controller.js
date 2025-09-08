@@ -37,8 +37,12 @@ exports.generateBill = async (req, res) => {
     });
     let invoiceNo = "001";
     if (lastBill && lastBill.invoiceNo) {
-      const lastNum = parseInt(lastBill.invoiceNo, 10);
-      invoiceNo = (lastNum + 1).toString().padStart(3, "0");
+      // Extract number from invoiceNo (e.g., "001" -> 1, "INV-001" -> 1)
+      const lastNumStr = lastBill.invoiceNo.replace(/[^\d]/g, ''); // Remove non-digits
+      const lastNum = parseInt(lastNumStr, 10);
+      if (!isNaN(lastNum)) {
+        invoiceNo = (lastNum + 1).toString().padStart(3, "0");
+      }
     }
 
     // Calculate totals
@@ -88,9 +92,16 @@ exports.generateBill = async (req, res) => {
 
     await newBill.save();
 
+    // Format the invoice number for response
+    const formattedInvoiceNo = `INV-${invoiceNo}`;
+    const responseBill = {
+      ...newBill.toObject(),
+      invoiceNo: formattedInvoiceNo,
+    };
+
     res
       .status(201)
-      .json({ message: "Bill generated successfully", bill: newBill });
+      .json({ message: "Bill generated successfully", bill: responseBill });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
@@ -132,7 +143,14 @@ exports.getInvoice = async (req, res) => {
     }
     const bill = await Bill.findOne(filter);
     if (!bill) return res.status(404).json({ message: "Invoice not found" });
-    res.json(bill);
+    
+    // Format the invoice number for response
+    const formattedBill = {
+      ...bill.toObject(),
+      invoiceNo: `INV-${bill.invoiceNo}`,
+    };
+    
+    res.json(formattedBill);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -146,9 +164,14 @@ exports.getLastInvoiceNumber = async (req, res) => {
     // Find the last bill for this garage
     const lastBill = await Bill.findOne({ garageId }).sort({ createdAt: -1 });
 
-    let lastInvoiceNo = "INV000";
+    let lastInvoiceNo = "INV-001";
     if (lastBill && lastBill.invoiceNo) {
-      lastInvoiceNo = `INV${lastBill.invoiceNo}`;
+      // Extract number from invoiceNo and format it properly
+      const lastNumStr = lastBill.invoiceNo.replace(/[^\d]/g, ''); // Remove non-digits
+      const lastNum = parseInt(lastNumStr, 10);
+      if (!isNaN(lastNum)) {
+        lastInvoiceNo = `INV-${lastNum.toString().padStart(3, "0")}`;
+      }
     }
 
     res.json({ lastInvoiceNo });
@@ -277,7 +300,7 @@ exports.getFinancialReport = async (req, res) => {
         laborCost: parseFloat(monthlyData[month].laborCost.toFixed(2)),
       })),
       recentBills: bills.slice(0, 10).map((bill) => ({
-        invoiceNo: bill.invoiceNo,
+        invoiceNo: `INV-${bill.invoiceNo}`,
         jobId: bill.jobId,
         customerName: bill.jobCardId?.customerName || "N/A",
         carNumber: bill.jobCardId?.carNumber || "N/A",
