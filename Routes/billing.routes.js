@@ -18,4 +18,7 @@ router.get("/last-invoice/:garageId", billingController.getLastInvoiceNumber);
 // Get financial report for garage
 router.get("/financial-report/:garageId", billingController.getFinancialReport);
 
+// Send bill PDF via email
+router.post("/send-email/:billId", billingController.sendBillEmail);
+
 module.exports = router;
