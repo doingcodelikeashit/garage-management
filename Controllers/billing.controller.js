@@ -1,6 +1,7 @@
 const Bill = require("../Model/bill.model");
 const JobCard = require("../Model/jobCard.model");
 const { sendEmailWithAttachment } = require("../Utils/emailWithAttachment");
+const multer = require("multer");
 
 exports.generateBill = async (req, res) => {
   try {
@@ -391,6 +392,101 @@ ${garage.name}
       pdfBuffer,
       `Invoice_${formattedInvoiceNo}.pdf`
     );
+
+    if (emailResult.success) {
+      res.status(200).json({
+        message: "Bill PDF sent successfully via email",
+        email: email,
+        invoiceNo: formattedInvoiceNo,
+        sentAt: new Date()
+      });
+    } else {
+      res.status(500).json({
+        message: "Failed to send email",
+        error: emailResult.error
+      });
+    }
+
+  } catch (error) {
+    console.error("Send bill email error:", error);
+    res.status(500).json({
+      message: "Server Error",
+      error: error.message
+    });
+  }
+};
+
+// Send bill PDF via email using file upload (alternative to base64)
+exports.sendBillEmailWithFile = async (req, res) => {
+  try {
+    const { billId } = req.params;
+    const { email, invoiceNo } = req.body;
+
+    // Validate required fields
+    if (!email) {
+      return res.status(400).json({ message: "Email address is required" });
+    }
+    if (!req.file) {
+      return res.status(400).json({ message: "PDF file is required" });
+    }
+
+    // Find the bill
+    const bill = await Bill.findById(billId).populate('jobCardId');
+    if (!bill) {
+      return res.status(404).json({ message: "Bill not found" });
+    }
+
+    // Get job card details
+    const jobCard = bill.jobCardId;
+    if (!jobCard) {
+      return res.status(404).json({ message: "Job card not found" });
+    }
+
+    // Get garage details
+    const garage = await require("../Model/garage.model").findById(bill.garageId);
+    if (!garage) {
+      return res.status(404).json({ message: "Garage not found" });
+    }
+
+    // Read the uploaded file
+    const fs = require('fs');
+    const pdfBuffer = fs.readFileSync(req.file.path);
+
+    // Prepare email content
+    const formattedInvoiceNo = invoiceNo || `INV-${bill.invoiceNo}`;
+    const subject = `Invoice ${formattedInvoiceNo} - ${garage.name}`;
+    const emailText = `
+Dear ${jobCard.customerName},
+
+Thank you for choosing ${garage.name} for your vehicle service.
+
+Please find attached your invoice for the service performed on your vehicle ${jobCard.carNumber} (${jobCard.model}).
+
+Invoice Details:
+- Invoice Number: ${formattedInvoiceNo}
+- Job ID: ${bill.jobId}
+- Service Date: ${bill.createdAt.toLocaleDateString('en-IN')}
+- Total Amount: ₹${bill.finalAmount}
+
+If you have any questions about this invoice, please don't hesitate to contact us.
+
+Thank you for your business!
+
+Best regards,
+${garage.name}
+    `;
+
+    // Send email with PDF attachment
+    const emailResult = await sendEmailWithAttachment(
+      email,
+      subject,
+      emailText,
+      pdfBuffer,
+      `Invoice_${formattedInvoiceNo}.pdf`
+    );
+
+    // Clean up uploaded file
+    fs.unlinkSync(req.file.path);
 
     if (emailResult.success) {
       res.status(200).json({

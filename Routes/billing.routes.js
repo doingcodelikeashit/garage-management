@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const billingController = require("../Controllers/billing.controller");
 const { auth } = require("../Middlewares/auth");
+const multer = require("multer");
 
 // Generate bill
 router.post("/generate/:jobCardId", billingController.generateBill);
@@ -20,5 +21,9 @@ router.get("/financial-report/:garageId", billingController.getFinancialReport);
 
 // Send bill PDF via email
 router.post("/send-email/:billId", billingController.sendBillEmail);
+
+// Send bill PDF via email using file upload (alternative)
+const upload = multer({ dest: 'uploads/temp/' });
+router.post("/send-email-file/:billId", upload.single('pdf'), billingController.sendBillEmailWithFile);
 
 module.exports = router;
