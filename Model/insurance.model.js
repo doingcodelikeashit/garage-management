@@ -19,6 +19,18 @@ const InsuranceSchema = new mongoose.Schema(
       required: [true, "Insurance company is required"],
       trim: true,
     },
+    policyNumber: {
+      type: String,
+      trim: true,
+    },
+    contactPerson: {
+      type: String,
+      trim: true,
+    },
+    contactNumber: {
+      type: String,
+      trim: true,
+    },
     expiryDate: {
       type: Date,
       required: [true, "Expiry date is required"],
