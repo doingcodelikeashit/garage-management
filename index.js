@@ -49,20 +49,20 @@ const corsOptions = {
 };
 
 // Use strict CORS policy
-app.use(cors(corsOptions));
+app.use(cors());
 
 // Add security headers for strict-origin-when-cross-origin
-app.use((req, res, next) => {
-  // Set Referrer Policy to strict-origin-when-cross-origin
-  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+// app.use((req, res, next) => {
+//   // Set Referrer Policy to strict-origin-when-cross-origin
+//   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
 
-  // Additional security headers
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("X-Frame-Options", "DENY");
-  res.setHeader("X-XSS-Protection", "1; mode=block");
+//   // Additional security headers
+//   res.setHeader("X-Content-Type-Options", "nosniff");
+//   res.setHeader("X-Frame-Options", "DENY");
+//   res.setHeader("X-XSS-Protection", "1; mode=block");
 
-  next();
-});
+//   next();
+// });
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
