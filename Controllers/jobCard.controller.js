@@ -348,11 +348,13 @@ const getJobCardsByGarage = async (req, res) => {
     }
 
     const jobCards = await JobCard.find(filter)
-      .populate("engineerId", "name")
-      .populate({
-        path: "createdBy",
-        select: "name email role",
-      }); // Populate creator info
+  .select("invoiceNo engineerId createdBy") // explicitly include invoiceNo
+  .populate("engineerId", "name")
+  .populate({
+    path: "createdBy",
+    select: "name email role",
+  });
+   // Populate creator info
     res.status(200).json(jobCards);
   } catch (error) {
     console.error("getJobCardsByGarage error:", error);
