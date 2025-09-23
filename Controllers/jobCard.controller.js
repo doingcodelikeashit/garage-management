@@ -347,15 +347,41 @@ const getJobCardsByGarage = async (req, res) => {
       filter.createdBy = createdBy;
     }
 
+    // Fetch job cards
     const jobCards = await JobCard.find(filter)
-  .select("invoiceNo engineerId createdBy") // explicitly include invoiceNo
-  .populate("engineerId", "name")
-  .populate({
-    path: "createdBy",
-    select: "name email role",
-  });
-   // Populate creator info
-    res.status(200).json(jobCards);
+      .populate("engineerId", "name")
+      .populate({
+        path: "createdBy",
+        select: "name email role",
+      });
+
+    // Include invoiceNo from Bill model (latest bill per job card)
+    const jobCardIds = jobCards.map((jc) => jc._id);
+    const Bill = require("../Model/bill.model");
+    const bills = await Bill.find({ jobCardId: { $in: jobCardIds } })
+      .sort({ createdAt: -1 })
+      .select("jobCardId invoiceNo createdAt");
+
+    const latestInvoiceByJobCard = new Map();
+    for (const b of bills) {
+      const key = String(b.jobCardId);
+      if (!latestInvoiceByJobCard.has(key)) {
+        latestInvoiceByJobCard.set(key, b.invoiceNo);
+      }
+    }
+
+    const result = jobCards.map((jc) => {
+      const rawInvoice = latestInvoiceByJobCard.get(String(jc._id));
+      const formattedInvoice = rawInvoice
+        ? `INV-${String(rawInvoice).replace(/[^\d]/g, "").padStart(3, "0")}`
+        : null;
+      return {
+        ...jc.toObject(),
+        invoiceNo: formattedInvoice,
+      };
+    });
+
+    res.status(200).json(result);
   } catch (error) {
     console.error("getJobCardsByGarage error:", error);
     res.status(500).json({ message: "Server Error", error: error.message });
