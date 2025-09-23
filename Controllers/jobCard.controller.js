@@ -311,9 +311,27 @@ const updateGenerateBillStatus = async (req, res) => {
       select: "name email role",
     });
 
+    // Attach latest invoice number from Bill model
+    let formattedInvoiceNo = null;
+    try {
+      const Bill = require("../Model/bill.model");
+      const latestBill = await Bill.findOne({ jobCardId: jobCard._id })
+        .sort({ createdAt: -1 })
+        .select("invoiceNo");
+      if (latestBill && latestBill.invoiceNo) {
+        const digits = String(latestBill.invoiceNo).replace(/[^\d]/g, "");
+        formattedInvoiceNo = `INV-${digits.padStart(3, "0")}`;
+      }
+    } catch (e) {
+      // ignore invoice lookup errors
+    }
+
     res.status(200).json({
       message: "Job Card bill status updated to true",
-      jobCard: populatedJobCard,
+      jobCard: {
+        ...populatedJobCard.toObject(),
+        invoiceNo: formattedInvoiceNo,
+      },
     });
   } catch (error) {
     console.error("Error updating bill status:", error);
@@ -413,7 +431,25 @@ const getJobCardById = async (req, res) => {
       return res.status(404).json({ message: "Job Card not found" });
     }
 
-    res.status(200).json(jobCard);
+    // Attach latest invoice number from Bill model
+    let formattedInvoiceNo = null;
+    try {
+      const Bill = require("../Model/bill.model");
+      const latestBill = await Bill.findOne({ jobCardId: jobCard._id })
+        .sort({ createdAt: -1 })
+        .select("invoiceNo");
+      if (latestBill && latestBill.invoiceNo) {
+        const digits = String(latestBill.invoiceNo).replace(/[^\d]/g, "");
+        formattedInvoiceNo = `INV-${digits.padStart(3, "0")}`;
+      }
+    } catch (e) {
+      // ignore invoice lookup errors
+    }
+
+    res.status(200).json({
+      ...jobCard.toObject(),
+      invoiceNo: formattedInvoiceNo,
+    });
   } catch (error) {
     console.error("getJobCardById error:", error);
     res.status(500).json({ message: "Server Error", error: error.message });
