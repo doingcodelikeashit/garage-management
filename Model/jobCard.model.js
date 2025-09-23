@@ -21,6 +21,7 @@ const JobCardSchema = new mongoose.Schema(
     fuelType: { type: String, required: true },
     fuelLevel: { type: String }, // Added fuel level
     insuranceProvider: { type: String },
+    invoiceNo: { type: String },
     policyNumber: { type: String },
     expiryDate: { type: Date },
     registrationNumber: { type: String },
