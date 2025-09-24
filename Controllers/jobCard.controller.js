@@ -496,6 +496,7 @@ const updateJobCard = async (req, res) => {
       "video",
       "status",
       "engineerId",
+      "gstApplicable"
     ];
     const filteredUpdates = {};
     for (const key of allowedFields) {
