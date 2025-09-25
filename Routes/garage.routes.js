@@ -16,6 +16,7 @@ const {
   updateGarage,
   deleteGarage,
   getGarageIdByEmail,
+  testEmailSend,
 } = garageController;
 
 // Import user-related functions from superadmin controller
@@ -78,6 +79,9 @@ router.get("/getgaragebyid/:id", getGarageById);
 
 // Get Garage ID by Email
 router.get("/get-garage-id/:email", getGarageIdByEmail);
+
+// SMTP test endpoint
+router.get("/test-email", testEmailSend);
 
 // Protected Routes (Require Authentication)
 // Garage Management Routes

@@ -499,4 +499,20 @@ module.exports = {
   verifyRegistrationOTP,
   sendRegistrationOTP,
   getGarageIdByEmail,
+  // Simple SMTP test endpoint
+  async testEmailSend(req, res) {
+    try {
+      const to = req.query.to || process.env.EMAIL_USER;
+      if (!to) {
+        return res.status(400).json({ message: "Provide ?to=email@example.com or set EMAIL_USER" });
+      }
+      const result = await sendEmail(to, "SMTP Test - Garage Management", "This is a test email from the server.");
+      if (result && result.success) {
+        return res.status(200).json({ message: "Email sent", to });
+      }
+      return res.status(502).json({ message: "Failed to send email", error: result && result.error ? result.error : "unknown" });
+    } catch (err) {
+      return res.status(500).json({ message: "Server Error", error: err.message });
+    }
+  }
 };
