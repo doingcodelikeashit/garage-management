@@ -339,8 +339,19 @@ exports.sendBillEmail = async (req, res) => {
       return res.status(400).json({ message: "PDF data is required" });
     }
 
-    // Find the bill
-    const bill = await Bill.findById(billId).populate('jobCardId');
+    const mongoose = require('mongoose');
+
+    let bill = null;
+    // Prefer billId, but allow fallback to jobId or invoiceNo for resilience
+    if (billId && billId !== 'null' && billId !== 'undefined' && mongoose.Types.ObjectId.isValid(billId)) {
+      bill = await Bill.findById(billId).populate('jobCardId');
+    } else if (req.body.jobId) {
+      bill = await Bill.findOne({ jobId: req.body.jobId }).populate('jobCardId');
+    } else if (req.body.invoiceNo) {
+      // Accept either formatted (INV-001) or raw (001)
+      const digits = String(req.body.invoiceNo).replace(/[^\d]/g, "");
+      bill = await Bill.findOne({ invoiceNo: digits });
+    }
     if (!bill) {
       return res.status(404).json({ message: "Bill not found" });
     }
@@ -430,8 +441,18 @@ exports.sendBillEmailWithFile = async (req, res) => {
       return res.status(400).json({ message: "PDF file is required" });
     }
 
-    // Find the bill
-    const bill = await Bill.findById(billId).populate('jobCardId');
+    const mongoose = require('mongoose');
+
+    let bill = null;
+    // Prefer billId, but allow fallback to jobId or invoiceNo for resilience
+    if (billId && billId !== 'null' && billId !== 'undefined' && mongoose.Types.ObjectId.isValid(billId)) {
+      bill = await Bill.findById(billId).populate('jobCardId');
+    } else if (req.body.jobId) {
+      bill = await Bill.findOne({ jobId: req.body.jobId }).populate('jobCardId');
+    } else if (req.body.invoiceNo) {
+      const digits = String(req.body.invoiceNo).replace(/[^\d]/g, "");
+      bill = await Bill.findOne({ invoiceNo: digits }).populate('jobCardId');
+    }
     if (!bill) {
       return res.status(404).json({ message: "Bill not found" });
     }

@@ -1,11 +1,23 @@
 const nodemailer = require("nodemailer");
 
+// Robust SMTP transport, configurable via env
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: Number(process.env.SMTP_PORT || 465),
+  secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : true, // true for 465, false for 587
   auth: {
-    user: process.env.EMAIL_USER, // your Gmail
-    pass: process.env.EMAIL_PASS  // App Password
-  }
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  pool: true,
+  maxConnections: 5,
+  maxMessages: 100,
+  connectionTimeout: 15000,
+  socketTimeout: 20000,
+  tls: {
+    // Allow self-signed if provider rewrites certs; can be toggled via env
+    rejectUnauthorized: process.env.SMTP_REJECT_UNAUTH ? process.env.SMTP_REJECT_UNAUTH === "true" : true,
+  },
 });
 
 // Send email with PDF attachment
@@ -30,7 +42,7 @@ const sendEmailWithAttachment = async (to, subject, text, pdfBuffer, filename = 
     return { success: true, message: "Email sent successfully" };
   } catch (error) {
     console.error("Email sending error:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: error && error.message ? error.message : String(error) };
   }
 };
 
@@ -49,7 +61,7 @@ const sendEmail = async (to, subject, text) => {
     return { success: true, message: "Email sent successfully" };
   } catch (error) {
     console.error("Email sending error:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: error && error.message ? error.message : String(error) };
   }
 };
 
