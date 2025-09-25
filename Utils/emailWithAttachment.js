@@ -1,11 +1,9 @@
 const nodemailer = require("nodemailer");
 const fetch = require("node-fetch");
 
-// Robust SMTP transport, configurable via env
+// Simple Gmail service transport
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: Number(process.env.SMTP_PORT || 465),
-  secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : true, // true for 465, false for 587
+  service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -15,10 +13,6 @@ const transporter = nodemailer.createTransport({
   maxMessages: 100,
   connectionTimeout: 15000,
   socketTimeout: 20000,
-  tls: {
-    // Allow self-signed if provider rewrites certs; can be toggled via env
-    rejectUnauthorized: process.env.SMTP_REJECT_UNAUTH ? process.env.SMTP_REJECT_UNAUTH === "true" : true,
-  },
 });
 
 // Send email with PDF attachment

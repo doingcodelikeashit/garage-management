@@ -1,20 +1,15 @@
 const nodemailer = require("nodemailer");
 const fetch = require("node-fetch");
 
-// More robust SMTP transport with timeouts and pooling
+// Simple Gmail service transport (uses Gmail + App Password)
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: Number(process.env.SMTP_PORT || 465),
-  secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : true, // true for 465
+  service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
   pool: true,
-  maxConnections: 5,
-  maxMessages: 100,
-  connectionTimeout: 15000,
-  socketTimeout: 20000,
+  maxConnections: 5
 });
 
 /**
